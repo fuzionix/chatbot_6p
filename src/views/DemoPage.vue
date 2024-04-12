@@ -370,10 +370,17 @@ export default {
             console.log(response.data)
             const data = response.data
 
-            // Check if predictions are completed
-            if (data.status === 'completed') {
-              // Predictions are completed, proceed with further actions
-              console.log('Predictions completed:', data.predictions)
+            // Check if predictions are succeeded
+            if (data.status === 'succeeded') {
+              // Predictions are succeeded, proceed with further actions
+              console.log('Predictions succeeded')
+              console.log('Predictions status:', data)
+              this.chatHistory = [{
+                name: 'Bot',
+                message: data.output.join(""),
+                user: false
+              }]
+              this.scrollToBottom()
             } else if (data.status === 'processing') {
               console.log('Predictions still pending. Waiting...')
               await this.delay(1000)
@@ -381,13 +388,6 @@ export default {
             } else {
               console.log('Predictions status:', data.status)
               console.log('Predictions status:', data)
-
-              this.chatHistory = [{
-                name: 'Bot',
-                message: data.output.join(""),
-                user: false
-              }]
-              this.scrollToBottom()
             }
           }).catch(error => {
             // Handle the error
