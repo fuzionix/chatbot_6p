@@ -14,4 +14,20 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://api.replicate.com/v1/models/meta/llama-2-70b-chat/predictions',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      '/get': {
+        target: 'https://api.replicate.com/v1/predictions',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/get/, ''),
+      }
+    },
+  },
 })

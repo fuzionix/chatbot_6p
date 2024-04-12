@@ -146,6 +146,8 @@
 </template>
 
 <script>
+import Replicate from "replicate"
+
 import Sidemenu from '@/components/Sidemenu.vue'
 import InfoPanel from '@/components/InfoPanel.vue'
 import Dialog from '@/components/Dialog.vue'
@@ -179,6 +181,8 @@ export default {
     ],
     data() {
       return {
+        api_key: import.meta.env.VITE_APP_REPLICATE_API_TOKEN,
+
         store: useStatusStore(),
         windowWidth: ref(window.innerWidth),
         minwindowWidth: 640,
@@ -214,24 +218,30 @@ export default {
       this.chatLoading = true
 
       axios({
-        method: 'get',
-        url: `http://127.0.0.1:8000/chat/get-item/`,
+        method: 'post',
+        url: '/api',
         data: {
-        }
-      }).then((res) => {
-        this.data = res.data
-        this.scrollToBottom()
-      }).catch((error) => {
-        console.error('Error: ', error)
-        this.chatLoadingSuccess = false
-        Object.assign(this.chatHistory.slice(-1)[0], {
-          name: 'Error System',
-          message: `Cannot load the story. Please try again [${error}]`,
-          user: false,
-          danger: true
-        })
-      }).finally(() => {
-        this.chatLoading = false
+          input: {
+            top_k: 0,
+            top_p: 1,
+            prompt: "Can you write a poem about open source machine learning? Let's make it in the style of E. E. Cummings.",
+            temperature: 0.5,
+            system_prompt: "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.",
+            length_penalty: 1,
+            max_new_tokens: 500,
+            min_new_tokens: -1,
+            prompt_template: "<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n{prompt} [/INST]",
+            presence_penalty: 0
+          }
+        },
+        headers: {
+          'Authorization': `Bearer ${this.api_key}`,
+          'Content-Type': 'application/json'
+        },
+      }).then(async response => {
+        this.getPredictions(response.data.id)
+      }).catch(error => {
+        console.error(error)
       })
     },
     mounted() {
@@ -346,6 +356,58 @@ export default {
             clearInterval(nInterval)
           }
         }, 50);
+      },
+      async getPredictions(predictionId) {
+        try {
+          await axios({
+            method: 'get',
+            url: `/get/${predictionId}`,
+            headers: {
+              'Authorization': `Bearer ${this.api_key}`
+            },
+          }).then(async response => {
+            // Handle the response data
+            console.log(response.data)
+            const data = response.data
+
+            // Check if predictions are completed
+            if (data.status === 'completed') {
+              // Predictions are completed, proceed with further actions
+              console.log('Predictions completed:', data.predictions)
+            } else if (data.status === 'processing') {
+              console.log('Predictions still pending. Waiting...')
+              await this.delay(1000)
+              await this.getPredictions(predictionId)
+            } else {
+              console.log('Predictions status:', data.status)
+              console.log('Predictions status:', data)
+
+              this.chatHistory = [{
+                name: 'Bot',
+                message: data.output.join(""),
+                user: false
+              }]
+              this.scrollToBottom()
+            }
+          }).catch(error => {
+            // Handle the error
+            console.error(error)
+            this.chatLoadingSuccess = false
+            Object.assign(this.chatHistory.slice(-1)[0], {
+              name: 'Error System',
+              message: `Cannot load the story. Please try again [${error}]`,
+              user: false,
+              danger: true
+            })
+          }).finally(() => {
+            this.chatLoading = false
+          })
+        } catch (error) {
+          console.error(error)
+        }
+      },
+      delay(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms))
       },
       chatRetry() {
         console.log('retry')

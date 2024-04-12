@@ -21,12 +21,12 @@
                 <CardHeader>
                   <CardTitle class="font-semibold text-base">
                     <ClipboardPenLine class="mb-2" />
-                    <span>Planing</span>
+                    <span>Planning</span>
                   </CardTitle>
                   <CardDescription>Please tell me the intended topic of your writing. I will guide you through the steps of the 6P pedagogy.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <FormField v-slot="{ componentField }" name="title">
+                  <FormField v-slot="{ componentField }" name="planning">
                     <FormItem class="mb-8">
                       <FormLabel>Your Topic</FormLabel>
                       <FormControl>
@@ -35,7 +35,7 @@
                       <FormMessage />
                     </FormItem>
                   </FormField>
-                  <FormField name="planing">
+                  <FormField name="planning">
                     <FormItem>
                       <div class="flex justify-between items-center">
                         <FormLabel>Result Penal</FormLabel>
@@ -65,7 +65,7 @@
                   <CardDescription>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <FormField v-slot="{ componentField }" name="charname">
+                  <FormField v-slot="{ componentField }" name="prompting">
                     <FormItem class="mb-8">
                       <FormLabel>Prompt</FormLabel>
                       <FormControl>
@@ -74,7 +74,7 @@
                       <FormMessage />
                     </FormItem>
                   </FormField>
-                  <FormField name="planing">
+                  <FormField name="planning">
                     <FormItem>
                       <div class="flex justify-between items-center">
                         <FormLabel>Result Penal</FormLabel>
@@ -137,8 +137,8 @@ const router = useRouter()
 const { toast } = useToast()
 
 const formSchema = toTypedSchema(z.object({
-  title: z.string().max(100, 'At most 100 charactors'),
-  charname: z.string().max(100, 'At most 100 charactors'),
+  planning: z.string().max(300, 'At most 300 charactors'),
+  prompting: z.string().max(300, 'At most 300 charactors'),
 }))
 
 const { handleSubmit } = useForm({
