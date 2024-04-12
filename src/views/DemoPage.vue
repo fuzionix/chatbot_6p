@@ -210,38 +210,9 @@ export default {
       }
 
       this.chatHistory.push({
-        name: '',
-        message: '',
+        name: 'Expert',
+        message: 'I am an expert of. Feel free to ask me anything about 😊',
         user: false
-      })
-
-      this.chatLoading = true
-
-      axios({
-        method: 'post',
-        url: '/api',
-        data: {
-          input: {
-            top_k: 0,
-            top_p: 1,
-            prompt: "Can you write a poem about open source machine learning? Let's make it in the style of E. E. Cummings.",
-            temperature: 0.5,
-            system_prompt: "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.",
-            length_penalty: 1,
-            max_new_tokens: 500,
-            min_new_tokens: -1,
-            prompt_template: "<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n{prompt} [/INST]",
-            presence_penalty: 0
-          }
-        },
-        headers: {
-          'Authorization': `Bearer ${this.api_key}`,
-          'Content-Type': 'application/json'
-        },
-      }).then(async response => {
-        this.getPredictions(response.data.id)
-      }).catch(error => {
-        console.error(error)
       })
     },
     mounted() {
@@ -301,28 +272,38 @@ export default {
 
           this.chatLoading = true
 
-          // send user input to server
           axios({
             method: 'post',
-            url: `http://127.0.0.1:8000/chat/`,
+            url: '/api',
             data: {
-            }
-          }).then((res) => {
-            this.data = res.data
-            Object.assign(this.chatHistory.slice(-1)[0], {
-              name: this.data['name'],
-              message: this.data['message'],
-              user: false
-            })
-            // this.displayText(this.data['message'])
+              input: {
+                top_k: 0,
+                top_p: 1,
+                prompt: this.userTextInput,
+                temperature: 0.5,
+                system_prompt: "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.",
+                length_penalty: 1,
+                max_new_tokens: 500,
+                min_new_tokens: -1,
+                prompt_template: "<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n{prompt} [/INST]",
+                presence_penalty: 0
+              }
+            },
+            headers: {
+              'Authorization': `Bearer ${this.api_key}`,
+              'Content-Type': 'application/json'
+            },
+          }).then(async (response) => {
+            this.getPredictions(response.data.id)
           }).catch((error) => {
+            console.error(error)
+            this.chatLoadingSuccess = false
             Object.assign(this.chatHistory.slice(-1)[0], {
               name: 'Error System',
-              message: `Someone tell him that the server side have some issues [${error}]`,
+              message: `Cannot load the response. Please try again [${error}]`,
               user: false,
               danger: true
             })
-            // this.displayText(this.data['message'])
           }).finally(() => {
             this.scrollToBottom()
             this.isActive = false
@@ -365,37 +346,35 @@ export default {
             headers: {
               'Authorization': `Bearer ${this.api_key}`
             },
-          }).then(async response => {
-            // Handle the response data
-            console.log(response.data)
+          }).then(async (response) => {
             const data = response.data
+            const updateRate = 500
+            this.chatLoading = false
 
             // Check if predictions are succeeded
             if (data.status === 'succeeded') {
-              // Predictions are succeeded, proceed with further actions
-              console.log('Predictions succeeded')
-              console.log('Predictions status:', data)
-              this.chatHistory = [{
-                name: 'Bot',
+              Object.assign(this.chatHistory.slice(-1)[0], {
+                name: 'Expert',
                 message: data.output.join(""),
                 user: false
-              }]
-              this.scrollToBottom()
+              })
             } else if (data.status === 'processing') {
-              console.log('Predictions still pending. Waiting...')
-              await this.delay(1000)
+              Object.assign(this.chatHistory.slice(-1)[0], {
+                name: 'Expert',
+                message: data.output.join(""),
+                user: false
+              })
+              await this.delay(updateRate)
               await this.getPredictions(predictionId)
             } else {
-              console.log('Predictions status:', data.status)
-              console.log('Predictions status:', data)
+              throw new Error('Unknown response status')
             }
-          }).catch(error => {
-            // Handle the error
+          }).catch((error) => {
             console.error(error)
             this.chatLoadingSuccess = false
             Object.assign(this.chatHistory.slice(-1)[0], {
               name: 'Error System',
-              message: `Cannot load the story. Please try again [${error}]`,
+              message: `Cannot load the response. Please try again [${error}]`,
               user: false,
               danger: true
             })
@@ -414,17 +393,7 @@ export default {
       },
       chatUndo() {
         if (this.chatHistory.length > 1) {
-          axios({
-            method: 'post',
-            url: `http://127.0.0.1:8000/chat/undo/`,
-            data: {
-              chatHistory: JSON.stringify(this.chatHistory.slice(0, -1))
-            }
-          }).then((res) => {
-            this.chatHistory.pop()
-          }).catch((error) => {
-            console.error('Error: ', error)
-          })
+          this.chatHistory.pop()
         }
       }
     }
