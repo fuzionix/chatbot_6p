@@ -30,12 +30,17 @@
                     <FormItem class="mb-8">
                       <FormLabel>Your Topic</FormLabel>
                       <FormControl>
-                        <Input type="text" class="h-[50px] pl-6 bg-theme-light text-md" placeholder="" v-bind="componentField" maxlength="100" autofocus  />
+                        <div class="relative">
+                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md" placeholder="" v-bind="componentField" maxlength="100" autofocus />
+                          <button type="submit" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
+                            <img src="@/assets/icon/send.svg" class="w-6" alt="">
+                          </button>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   </FormField>
-                  <FormField name="planning">
+                  <FormField name="">
                     <FormItem>
                       <div class="flex justify-between items-center">
                         <FormLabel>Result Penal</FormLabel>
@@ -69,12 +74,17 @@
                     <FormItem class="mb-8">
                       <FormLabel>Prompt</FormLabel>
                       <FormControl>
-                        <Input type="text" class="h-[50px] pl-6 bg-theme-light text-md" placeholder="" v-bind="componentField" maxlength="100"  />
+                        <div class="relative">
+                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md" placeholder="" v-bind="componentField" maxlength="100" autofocus />
+                          <button type="submit" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
+                            <img src="@/assets/icon/send.svg" class="w-6" alt="">
+                          </button>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   </FormField>
-                  <FormField name="planning">
+                  <FormField name="">
                     <FormItem>
                       <div class="flex justify-between items-center">
                         <FormLabel>Result Penal</FormLabel>
@@ -94,7 +104,14 @@
                     </FormItem>
                   </FormField>
                 </CardContent>
-                <CardFooter class="text-xs text-theme-black opacity-65">
+                <CardFooter class="text-xs text-theme-black">
+                  <Button 
+                    @click="$router.push('/demo')" 
+                    class="flex items-center w-full h-[40px] py-2 px-3 mb-2 rounded-lg"
+                  >
+                    <MessageSquareText size="20" :strokeWidth="1.5" class="mr-8" />
+                    <span class="font-medium text-sm">AI Chatbot</span>
+                  </Button>
                 </CardFooter>
               </Card>
             </form>
@@ -124,7 +141,9 @@ import {
   Sparkles,
   Plus,
   View,
-  RotateCcw    
+  RotateCcw,
+  MessageSquareText, 
+  SendHorizontal    
 } from 'lucide-vue-next'
 
 import { toTypedSchema } from '@vee-validate/zod'
