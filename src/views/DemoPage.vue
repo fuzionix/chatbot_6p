@@ -193,7 +193,6 @@ export default {
           title_description: 'This chatbot guides students through the 6P pedagogy for academic writing'
         },
         chatLoading: false,
-        chatLoadingSuccess: true,
         chatHistory: [],
         animateText: [],
         userTextInput: '',
@@ -222,11 +221,8 @@ export default {
       window.removeEventListener('resize', this.detectWindowSize);
     },
     beforeRouteLeave(to, from) {
-      // prevent popup if no data fetched
-      if (this.chatLoadingSuccess) {
-        const answer = window.confirm('Are you sure you want to leave? Confirm to exit')
-        if (!answer) return false
-      }
+      const answer = window.confirm('Are you sure you want to leave? Confirm to exit')
+      if (!answer) return false
     },
     methods: {
       openSidemenu() {
@@ -297,7 +293,6 @@ export default {
             this.getPredictions(response.data.id)
           }).catch((error) => {
             console.error(error)
-            this.chatLoadingSuccess = false
             Object.assign(this.chatHistory.slice(-1)[0], {
               name: 'Error System',
               message: `Cannot load the response. Please try again [${error}]`,
@@ -359,11 +354,7 @@ export default {
                 user: false
               })
             } else if (data.status === 'processing') {
-              Object.assign(this.chatHistory.slice(-1)[0], {
-                name: 'Expert',
-                message: data.output.join(""),
-                user: false
-              })
+              this.chatLoading = true
               await this.delay(updateRate)
               await this.getPredictions(predictionId)
             } else {
@@ -371,7 +362,6 @@ export default {
             }
           }).catch((error) => {
             console.error(error)
-            this.chatLoadingSuccess = false
             Object.assign(this.chatHistory.slice(-1)[0], {
               name: 'Error System',
               message: `Cannot load the response. Please try again [${error}]`,

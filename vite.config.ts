@@ -29,5 +29,8 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/get/, ''),
       }
     },
+    watch: {
+      usePolling: true
+    }
   },
 })

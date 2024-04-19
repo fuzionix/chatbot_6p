@@ -1,7 +1,7 @@
 FROM node:21-alpine as front-end
 
 WORKDIR /app
-COPY package*.json ./
+COPY package.json ./
 RUN npm install
 COPY . .
 
