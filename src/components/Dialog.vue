@@ -98,7 +98,7 @@
 </template>
 
 <script>
-import { useStatusStore } from '@/store/useStatusStore'
+import { useStatusStore } from '@/store/StatusStore'
 import { useToast } from '@/components_shadcn/ui/toast/use-toast'
 
 import { Button } from '@/components_shadcn/ui/button'

@@ -31,7 +31,7 @@
                       <FormLabel>Your Topic</FormLabel>
                       <FormControl>
                         <div class="relative">
-                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md" placeholder="" v-bind="componentField" maxlength="100" autofocus />
+                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md" placeholder="" v-bind="componentField" maxlength="300" autofocus />
                           <button type="submit" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
                             <img src="@/assets/icon/send.svg" class="w-6" alt="">
                           </button>
@@ -43,7 +43,7 @@
                   <FormField name="">
                     <FormItem>
                       <div class="flex justify-between items-center">
-                        <FormLabel>Result Penal</FormLabel>
+                        <FormLabel>Result Panel</FormLabel>
                         <button 
                           class="hover:-rotate-180 duration-200"
                           @click.prevent=""
@@ -75,7 +75,7 @@
                       <FormLabel>Prompt</FormLabel>
                       <FormControl>
                         <div class="relative">
-                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md" placeholder="" v-bind="componentField" maxlength="100" autofocus />
+                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md" placeholder="" v-bind="componentField" maxlength="300" autofocus />
                           <button type="submit" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
                             <img src="@/assets/icon/send.svg" class="w-6" alt="">
                           </button>
@@ -87,7 +87,7 @@
                   <FormField name="">
                     <FormItem>
                       <div class="flex justify-between items-center">
-                        <FormLabel>Result Penal</FormLabel>
+                        <FormLabel>Result Panel</FormLabel>
                         <button 
                           class="hover:-rotate-180 duration-200"
                           @click.prevent=""
@@ -156,8 +156,8 @@ const router = useRouter()
 const { toast } = useToast()
 
 const formSchema = toTypedSchema(z.object({
-  planning: z.string().max(300, 'At most 300 charactors'),
-  prompting: z.string().max(300, 'At most 300 charactors'),
+  planning: z.string().max(300 - 1, 'At most 300 charactors').optional(),
+  prompting: z.string().max(300 - 1, 'At most 300 charactors').optional(),
 }))
 
 const { handleSubmit } = useForm({

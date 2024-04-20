@@ -70,7 +70,7 @@
 </template>
 
 <script>
-import { useStatusStore } from '@/store/useStatusStore'
+import { useStatusStore } from '@/store/StatusStore'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components_shadcn/ui/alert'
 

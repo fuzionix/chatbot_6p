@@ -161,7 +161,8 @@ import {
 import { Button } from '@/components_shadcn/ui/button'
 import { useToast } from '@/components_shadcn/ui/toast/use-toast'
 
-import { useStatusStore } from '@/store/useStatusStore'
+import { useStatusStore } from '@/store/StatusStore'
+import { useChatHistoryStore } from '@/store/ChatHistoryStore'
 import { ref } from 'vue'
 
 import axios from 'axios'
@@ -184,6 +185,7 @@ export default {
         api_key: import.meta.env.VITE_APP_REPLICATE_API_TOKEN,
 
         store: useStatusStore(),
+        chatHistoryStore: useChatHistoryStore(),
         windowWidth: ref(window.innerWidth),
         minwindowWidth: 640,
         fillIcon: false,
@@ -208,11 +210,15 @@ export default {
         this.store.sidemenuStatus = false
       }
 
-      this.chatHistory.push({
-        name: 'Expert',
-        message: 'I am an expert of. Feel free to ask me anything about 😊',
-        user: false
+      this.chatHistoryStore.chatHistory.forEach((chat) => {
+        this.chatHistory.push(chat)
       })
+        
+      // this.chatHistory.push({
+      //   name: 'Expert',
+      //   message: 'I am an expert of. Feel free to ask me anything about 😊',
+      //   user: false
+      // })
     },
     mounted() {
       window.addEventListener('resize', this.detectWindowSize);
