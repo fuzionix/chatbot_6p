@@ -74,7 +74,9 @@
                     alt="" 
                     width="24"
                   >
-                  <p v-if="true" class="w-fit">{{ chat.message }}</p>
+                  <p v-if="true" class="w-fit">
+                    <pre class="">{{ chat.message }}</pre>
+                  </p>
                   <!-- <p v-else class="w-fit">
                     <span v-for="word in animateText" class="inline-block animate-fade-in">{{ word }}&nbsp</span>
                   </p> -->
@@ -195,7 +197,6 @@ export default {
           title_description: 'This chatbot guides students through the 6P pedagogy for academic writing'
         },
         chatLoading: false,
-        chatHistory: [],
         animateText: [],
         userTextInput: '',
         userTextInputTemp: '',
@@ -204,21 +205,14 @@ export default {
       }
     },
     computed: {
+      chatHistory() {
+        return this.chatHistoryStore.getChatHistory
+      }
     },
     created() {
       if (this.windowWidth <= this.minwindowWidth) {
         this.store.sidemenuStatus = false
       }
-
-      this.chatHistoryStore.chatHistory.forEach((chat) => {
-        this.chatHistory.push(chat)
-      })
-        
-      // this.chatHistory.push({
-      //   name: 'Expert',
-      //   message: 'I am an expert of. Feel free to ask me anything about 😊',
-      //   user: false
-      // })
     },
     mounted() {
       window.addEventListener('resize', this.detectWindowSize);
@@ -253,25 +247,29 @@ export default {
 
           if (this.chatHistory.slice(-1)[0]?.['danger'] == true) {
             this.chatHistory.pop()
+            if (refresh !== true) {
+              this.chatHistory.pop()
+            }
           }
 
           textInput = textInput.replace(/@(\w+)/g, '').trim()
 
           // insert message into chat history. display new chat bubble automatically
           if (!refresh) {
-            this.chatHistory.push({
+            this.chatHistoryStore.addChatItem({
               name: 'You',
               message: textInput,
               user: true
             })
           }
+
+          const prompt = this.createPrompt(this.chatHistory)
           
-          this.chatHistory.push({
+          this.chatHistoryStore.addChatItem({
             name: '',
             message: '',
             user: false
           })
-
           this.chatLoading = true
 
           axios({
@@ -279,11 +277,10 @@ export default {
             url: '/api',
             data: {
               input: {
-                top_k: 0,
                 top_p: 1,
-                prompt: this.userTextInput,
+                prompt: prompt,
                 temperature: 0.5,
-                system_prompt: "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.",
+                system_prompt: "Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.",
                 length_penalty: 1,
                 max_new_tokens: 500,
                 min_new_tokens: -1,
@@ -317,6 +314,20 @@ export default {
         }
         
       },
+      createPrompt(chatHistory = []) {
+        let promptResult = ''
+        let promptRole = 'You are an expert in math.'
+
+        promptResult += `${promptRole} \n`
+
+        chatHistory.forEach((item) => {
+          promptResult += `${item.name}: ${item.message} \n`
+        })
+
+        promptResult += `Expert: `
+
+        return promptResult
+      },
       scrollToBottom() {
         this.$nextTick(() => {
           this.$refs.chatMessageBox.scrollIntoView({ 
@@ -325,19 +336,6 @@ export default {
             inline: "nearest" 
           })
         })
-      },
-      displayText() {
-        let messageResult = this.chatHistory.slice(-1)[0]['message'].split(' ')
-        let messageIndex = 0
-        
-        const nInterval = setInterval(() => {
-          this.animateText.push(messageResult[messageIndex])
-          messageIndex += 1
-
-          if ((messageIndex >= messageResult.length) || (messageIndex > 1000)) {
-            clearInterval(nInterval)
-          }
-        }, 50);
       },
       async getPredictions(predictionId) {
         try {
@@ -354,7 +352,7 @@ export default {
 
             // Check if predictions are succeeded
             if (data.status === 'succeeded') {
-              Object.assign(this.chatHistory.slice(-1)[0], {
+              this.chatHistoryStore.assignChatItem({
                 name: 'Expert',
                 message: data.output.join(""),
                 user: false
@@ -389,7 +387,7 @@ export default {
       },
       chatUndo() {
         if (this.chatHistory.length > 1) {
-          this.chatHistory.pop()
+          this.chatHistoryStore.popChatItem()
         }
       }
     }

@@ -5,18 +5,27 @@ export const useChatHistoryStore = defineStore('chatHistoryStore', {
     return { 
       chatHistory: [
         {
-          name: 'Expert Pinia',
-          message: 'I am an expert of. Feel free to ask me anything about 😊',
+          name: 'Expert',
+          message: 'I am an expert of math. Feel free to ask me anything about math 😊',
           user: false
-        },
-        {
-          name: 'You',
-          message: 'Hello there!',
-          user: true
         }
       ]
     }
   },
   getters: {
+    getChatHistory() {
+      return this.chatHistory
+    }
   },
+  actions: {
+    addChatItem(item) {
+      this.chatHistory.push(item)
+    },
+    assignChatItem(item) {
+      Object.assign(this.chatHistory.slice(-1)[0], item)
+    },
+    popChatItem() {
+      this.chatHistory.pop()
+    }
+  }
 })
