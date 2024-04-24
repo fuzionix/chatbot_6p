@@ -61,7 +61,7 @@
                   </FormField>
                 </CardContent>
               </Card>
-              <Card class="mb-6">
+              <Card class="relative mb-6 border-none opacity-25 pointer-events-none select-none">
                 <CardHeader>
                   <CardTitle class="font-semibold text-base">
                     <Sparkles class="mb-2" />
@@ -75,7 +75,7 @@
                       <FormLabel>Prompt</FormLabel>
                       <FormControl>
                         <div class="relative">
-                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md" placeholder="" v-bind="componentField" maxlength="300" autofocus />
+                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md z-0" placeholder="" v-bind="componentField" maxlength="300" autofocus />
                           <button type="submit" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
                             <img src="@/assets/icon/send.svg" class="w-6" alt="">
                           </button>

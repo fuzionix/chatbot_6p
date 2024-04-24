@@ -62,13 +62,13 @@ Before you can set up the project using Docker, make sure you have the following
    cd chatbot_6p
    ```
 
-2. Build the Docker image:
+2. Create `.env` file with `VITE_APP_REPLICATE_API_TOKEN=[YOUR_API_TOKEN]`
+
+3. Build the Docker image:
 
    ```bash
    docker build -t chatbot6p .
    ```
-
-3. Create `.env` file with `VITE_APP_REPLICATE_API_TOKEN=[YOUR_API_TOKEN]`
 
 #### Start Docker Container
 
