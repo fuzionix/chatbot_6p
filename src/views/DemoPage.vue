@@ -110,11 +110,13 @@
           class="fixed bottom-0 h-[--chat] px-7 w-full duration-300 bg-theme-verylight shadow-line focus-within:shadow-line-active"
         >
           <div class="absolute flex -top-12 right-3 p-1 bg-theme-gridlight rounded-lg">
-            <button @click="chatRetry()" class="rounded p-1 hover:bg-[#0001]">
+            <button @click="chatReset()" class="flex items-center text-sm rounded p-1 mr-2 hover:bg-[#0001]">
               <RotateCw :size="20" :strokeWidth="1.5"/>
+              <p class="pl-2">Reset</p>
             </button>
-            <button @click="chatUndo()" class="rounded p-1 hover:bg-[#0001]">
+            <button @click="chatUndo()" class="flex items-center text-sm rounded p-1 hover:bg-[#0001]">
               <Undo2 :size="20" :strokeWidth="1.5"/>
+              <p class="pl-2">Undo</p>
             </button>
           </div>
           <div id="input-frame" class="flex items-center h-full">
@@ -382,8 +384,10 @@ export default {
       delay(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms))
       },
-      chatRetry() {
-        console.log('retry')
+      chatReset() {
+        if (this.chatHistory.length > 1) {
+          this.chatHistoryStore.$reset()
+        }
       },
       chatUndo() {
         if (this.chatHistory.length > 1) {

@@ -5,9 +5,16 @@ export const useWritingBotStore = defineStore('writingBotStore', {
     return { 
       panelHistory: [
         {
-            userInput: '',
-            result: '',
-            trigger: true
+          name: 'planning',
+          userInput: '',
+          result: '',
+          triggered: true
+        },
+        {
+          name: 'prompting',
+          userInput: '',
+          result: '',
+          triggered: false
         }
       ]
     }
