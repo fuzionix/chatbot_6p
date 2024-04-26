@@ -62,7 +62,8 @@
                       <FormControl>
                         <Textarea
                           placeholder=""
-                          class="resize-none bg-theme-light text-md"
+                          class="bg-theme-light text-md"
+                          rows="4"
                           v-bind="componentField"
                         />
                       </FormControl>
@@ -93,41 +94,14 @@
                   <CardDescription>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <FormField v-slot="{ componentField }" name="prompt1">
+                  <FormField v-for="i in formSchemaPromptAmount" v-slot="{ componentField }" :name="`prompt${i}`">
                     <FormItem class="mb-4">
                       <FormControl>
                         <div class="relative">
-                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md z-0" placeholder="Prompt 1" v-bind="componentField" maxlength="300" autofocus />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-                  <FormField v-slot="{ componentField }" name="prompt2">
-                    <FormItem class="mb-4">
-                      <FormControl>
-                        <div class="relative">
-                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md z-0" placeholder="Prompt 2" v-bind="componentField" maxlength="300" autofocus />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-                  <FormField v-slot="{ componentField }" name="prompt3">
-                    <FormItem class="mb-4">
-                      <FormControl>
-                        <div class="relative">
-                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md z-0" placeholder="Prompt 3" v-bind="componentField" maxlength="300" autofocus />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-                  <FormField v-slot="{ componentField }" name="prompt4">
-                    <FormItem class="mb-4">
-                      <FormControl>
-                        <div class="relative">
-                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md z-0" placeholder="Prompt 4" v-bind="componentField" maxlength="300" autofocus />
+                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-sm z-0" :placeholder="`Prompt ${i}`" v-bind="componentField" maxlength="300" autofocus />
+                          <button type="submit" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
+                            <WandSparkles width="16" height="16" alt="" />
+                          </button>
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -156,22 +130,8 @@
                 <CardContent>
                   <FormField v-slot="{ componentField }" name="preview">
                     <FormItem class="mb-8">
-                      <FormLabel>Your Topic</FormLabel>
-                      <FormControl>
-                        <div class="relative">
-                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md" placeholder="" v-bind="componentField" maxlength="300" autofocus />
-                          <button type="submit" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
-                            <img src="@/assets/icon/send.svg" class="w-6" alt="">
-                          </button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  </FormField>
-                  <FormField name="">
-                    <FormItem>
                       <div class="flex justify-between items-center">
-                        <FormLabel>Result Panel</FormLabel>
+                        <FormLabel>Preview Panel</FormLabel>
                         <button 
                           class="hover:-rotate-180 duration-200"
                           @click.prevent=""
@@ -179,15 +139,104 @@
                           <RotateCcw width="16" height="16" />
                         </button>
                       </div>
-                      
-                      <div class="!my-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</div>
+                      <FormControl>
+                        <Textarea
+                          placeholder=""
+                          class="bg-theme-light text-md"
+                          rows="10"
+                          v-bind="componentField"
+                        />
+                      </FormControl>
                       <FormDescription>
                         <span class="text-xs">The result will be automatically generated, but you can still make edits to it.</span>
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   </FormField>
+                  <FormField v-slot="{ componentField }" name="refinements">
+                    <FormItem class="mb-8">
+                      <FormLabel>Suggestion of Refinements</FormLabel>
+                      <FormControl>
+                        <div class="relative">
+                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md" placeholder="" v-bind="componentField" maxlength="300" autofocus />
+                          <button type="submit" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
+                            <WandSparkles width="16" height="16" alt="" />
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  </FormField>
                 </CardContent>
+                <CardFooter class="text-xs text-theme-black">
+                  <Button 
+                    @click="$router.push('/demo')" 
+                    class="flex items-center w-full h-[40px] py-2 px-3 mb-2 rounded-lg"
+                  >
+                    <ClipboardCheck size="20" :strokeWidth="1.5" class="mr-8" />
+                    <span class="font-medium text-sm">Okay, I Finished</span>
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card class="mb-6">
+                <CardHeader>
+                  <CardTitle class="font-semibold text-base">
+                    <BookOpenCheck class="mb-2" />
+                    <span>Produce</span>
+                  </CardTitle>
+                  <CardDescription>Please tell me the intended topic of your writing. I will guide you through the steps of the 6P pedagogy.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <FormField v-slot="{ componentField }" name="preview">
+                    <FormItem class="mb-8">
+                      <div class="flex justify-between items-center">
+                        <FormLabel>Preview Panel</FormLabel>
+                        <button 
+                          class="hover:-rotate-180 duration-200"
+                          @click.prevent=""
+                        >
+                          <RotateCcw width="16" height="16" />
+                        </button>
+                      </div>
+                      <FormControl>
+                        <Textarea
+                          placeholder=""
+                          class="bg-theme-light text-md"
+                          rows="10"
+                          v-bind="componentField"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        <span class="text-xs">The result will be automatically generated, but you can still make edits to it.</span>
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  </FormField>
+                  <FormField v-slot="{ componentField }" name="refinements">
+                    <FormItem class="mb-8">
+                      <FormLabel>Suggestion of Refinements</FormLabel>
+                      <FormControl>
+                        <div class="relative">
+                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md" placeholder="" v-bind="componentField" maxlength="300" autofocus />
+                          <button type="submit" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
+                            <WandSparkles width="16" height="16" alt="" />
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  </FormField>
+                </CardContent>
+                <CardFooter class="text-xs text-theme-black">
+                  <Button 
+                    @click="$router.push('/demo')" 
+                    class="flex items-center w-full h-[40px] py-2 px-3 mb-2 rounded-lg"
+                  >
+                    <ClipboardCheck size="20" :strokeWidth="1.5" class="mr-8" />
+                    <span class="font-medium text-sm">Okay, I Finished</span>
+                  </Button>
+                </CardFooter>
               </Card>
             </form>
           </div>
@@ -199,7 +248,7 @@
 </template>
 
 <script setup>
-import { ref, toRaw, nextTick } from 'vue'
+import { ref, toRaw, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 import NavigationBar from '@/components/NavigationBar.vue'
@@ -221,7 +270,8 @@ import {
   SendHorizontal,
   ClipboardCheck,
   WandSparkles,
-  Eye  
+  Eye,
+  BookOpenCheck   
 } from 'lucide-vue-next'
 
 import { toTypedSchema } from '@vee-validate/zod'
@@ -233,14 +283,19 @@ import axios from 'axios'
 const router = useRouter()
 const { toast } = useToast()
 
-const formSchema = toTypedSchema(z.object({
+const formSchemaPromptAmount = 4
+const formSchemaObject = {
   topic: z.string().max(300 - 1, 'At most 300 charactors').optional(),
   plan: z.string().max(300 - 1, 'At most 300 charactors').optional(),
-  prompt1: z.string().max(300 - 1, 'At most 300 charactors').optional(),
-  prompt2: z.string().max(300 - 1, 'At most 300 charactors').optional(),
-  prompt3: z.string().max(300 - 1, 'At most 300 charactors').optional(),
-  prompt4: z.string().max(300 - 1, 'At most 300 charactors').optional(),
-}))
+  preview: z.string().max(2000 - 1, 'At most 300 charactors').optional(),
+  refinements: z.string().max(2000 - 1, 'At most 300 charactors').optional(),
+}
+
+for (let i = 0; i <= formSchemaPromptAmount; i++) {
+  formSchemaObject[`prompt${i}`] = z.string().max(300 - 1, 'At most 300 charactors').optional()
+}
+
+const formSchema = toTypedSchema(z.object(formSchemaObject))
 
 const { handleSubmit } = useForm({
   validationSchema: formSchema,
@@ -249,6 +304,12 @@ const { handleSubmit } = useForm({
 const onSubmit = handleSubmit((values) => {
   console.log(values)
 })
+
+onMounted(() => {
+  
+})
+
+
 
 </script>
 
