@@ -12,6 +12,10 @@
             Writing With AI
           </h1>
           <p class="text-sm mt-6">This chatbot guides students through the 6P pedagogy for academic writing. <a href="https://www.lttc.eduhk.hk/papers/6p.pdf" class="underline" target="_blank">Papers</a></p>
+          <button @click="$router.push('/demo')" class="flex items-center w-full py-2 px-3 mt-6 rounded-lg border-x-theme-gridlight border duration-200 hover:bg-theme-light active:bg-theme-grid">
+            <MessageSquareText size="20" :strokeWidth="1.5" class="mr-8" />
+            <span class="mb-[0.125rem] font-medium text-sm">AI Chatbot</span>
+          </button>
           <Alert v-if="connectError" class="my-8" variant="destructive">
             <AlertCircle class="w-4 h-4" />
             <AlertTitle>Failed To Connect!</AlertTitle>
@@ -27,7 +31,7 @@
               @submit.prevent="onSubmit()" 
               class="w-full [&>*:last-child]:border-none [&>*:last-child]:opacity-25 [&>*:last-child]:pointer-events-none [&>*:last-child]:select-none"
             >
-              <!-- Plan -->
+              <!-- 1. Plan -->
               <Card class="mb-6">
                 <CardHeader>
                   <CardTitle class="font-semibold text-base">
@@ -87,7 +91,7 @@
                 </CardContent>
                 <CardFooter class="text-xs text-theme-black">
                   <Button 
-                    @click="$router.push('/demo')" 
+                    @click="submitForm('plan')" 
                     class="flex items-center w-full h-[40px] py-2 px-3 mb-2 rounded-lg"
                   >
                     <ClipboardCheck size="20" :strokeWidth="1.5" class="mr-8" />
@@ -96,7 +100,7 @@
                 </CardFooter>
               </Card>
 
-              <!-- Prompt -->
+              <!-- 2. Prompt -->
               <Card class="mb-6">
                 <CardHeader>
                   <CardTitle class="font-semibold text-base">
@@ -136,7 +140,7 @@
                 </CardFooter>
               </Card>
 
-              <!-- Preview -->
+              <!-- 3. Preview -->
               <Card class="mb-6">
                 <CardHeader>
                   <CardTitle class="font-semibold text-base">
@@ -197,7 +201,7 @@
                 </CardFooter>
               </Card>
 
-              <!-- Produce -->
+              <!-- 4. Produce -->
               <Card class="mb-6">
                 <CardHeader>
                   <CardTitle class="font-semibold text-base">
@@ -295,7 +299,8 @@ const connectErrorMessage = ref('')
 const sideinfo = ref(null)
 
 onMounted(() => {
-  window.addEventListener("scroll", handleScroll)
+  const scroll = window.addEventListener("scroll", handleScroll)
+  const resize = window.addEventListener("resize", handleScroll)
 
   function handleScroll() {
     if (window.innerWidth >= 1024) {
@@ -306,9 +311,16 @@ onMounted(() => {
     
   }
 })
+
+const formdata = ref({})
 const onSubmit = handleSubmit((values) => {
-  console.log(values)
+  formdata.value = values
+  console.log(formdata.value.topic)
 })
+
+function submitForm(phase) {
+  console.log(phase)
+}
 
 
 

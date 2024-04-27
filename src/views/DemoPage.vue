@@ -382,7 +382,10 @@ export default {
       },
       chatReset() {
         if (this.chatHistory.length > 1) {
-          this.chatHistoryStore.$reset()
+          const answer = window.confirm('Are you sure you want to reset the conversation? Confirm to reset')
+          if (answer) {
+            this.chatHistoryStore.$reset()
+          }
         }
       },
       chatUndo() {
