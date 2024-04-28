@@ -47,6 +47,7 @@
                       <FormControl>
                         <div class="relative">
                           <Input 
+                            @input="submitForm('plan')"
                             type="text" 
                             class="h-[50px] pl-6 pr-12 bg-theme-light text-md" 
                             placeholder="" 
@@ -327,10 +328,11 @@ const onSubmit = handleSubmit((values) => {
 
 function submitForm(phase) {
   onSubmit().then((values) => {
+    console.log(values)
     if (values) {
       switch (phase) {
         case 'plan':
-          writingBotStore.addPanelItem({
+          writingBotStore.updatePanelItem({
             name: phase,
             topic: values.topic,
             plan: values.plan

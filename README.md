@@ -75,7 +75,7 @@ Before you can set up the project using Docker, make sure you have the following
 1. Start the Docker container:
 
    ```bash
-   docker run --rm -p --name chatbot6p_c 5173:5173 chatbot6p
+   docker run --rm -p 5173:5173 --name chatbot6p_c chatbot6p
    ```
    or with bind mount
    ```bash

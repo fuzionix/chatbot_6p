@@ -3,16 +3,20 @@ import { defineStore } from 'pinia'
 export const useWritingBotStore = defineStore('writingBotStore', {
   state: () => {
     return { 
-      panelHistory: []
+      panelHistory: [],
+      panelProgress: 0
     }
   },
   getters: {
     getPanelHistory() {
       return this.panelHistory
+    },
+    getPanelProgress() {
+      return this.panelProgress
     }
   },
   actions: {
-    addPanelItem(item) {
+    updatePanelItem(item) {
       this.panelHistory.push(item)
     }
   }
