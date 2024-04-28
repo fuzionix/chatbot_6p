@@ -28,7 +28,7 @@
         <div class="flex-1">
           <div class="flex">
             <form 
-              @submit.prevent="onSubmit()" 
+              @submit.prevent="" 
               class="w-full [&>*:last-child]:border-none [&>*:last-child]:opacity-25 [&>*:last-child]:pointer-events-none [&>*:last-child]:select-none"
             >
               <!-- 1. Plan -->
@@ -46,7 +46,14 @@
                       <FormLabel>Your Topic</FormLabel>
                       <FormControl>
                         <div class="relative">
-                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md" placeholder="" v-bind="componentField" maxlength="300" autofocus />
+                          <Input 
+                            type="text" 
+                            class="h-[50px] pl-6 pr-12 bg-theme-light text-md" 
+                            placeholder="" 
+                            v-bind="componentField" 
+                            maxlength="300" 
+                            autofocus 
+                          />
                           <button type="submit" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
                             <WandSparkles width="16" height="16" alt="" />
                           </button>
@@ -239,6 +246,7 @@
 </template>
 
 <script setup>
+import { useWritingBotStore } from '@/store/WritingBotStore'
 import { ref, toRaw, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -273,15 +281,17 @@ import * as z from 'zod'
 
 import axios from 'axios'
 
+const writingBotStore = useWritingBotStore()
+const panelHistory = toRaw(writingBotStore.getPanelHistory)
 const router = useRouter()
 const { toast } = useToast()
 
 const formSchemaPromptAmount = 4
 const formSchemaObject = {
-  topic: z.string().max(300 - 1, 'At most 300 charactors').optional(),
-  plan: z.string().max(300 - 1, 'At most 300 charactors').optional(),
-  preview: z.string().max(2000 - 1, 'At most 300 charactors').optional(),
-  refinements: z.string().max(2000 - 1, 'At most 300 charactors').optional(),
+  topic: z.string().max(300 - 1, 'At most 300 charactors').default(panelHistory[0]?.topic),
+  plan: z.string().max(1000 - 1, 'At most 1000 charactors').default(panelHistory[0]?.plan),
+  preview: z.string().max(2000 - 1, 'At most 2000 charactors').optional(),
+  refinements: z.string().max(2000 - 1, 'At most 2000 charactors').optional(),
 }
 
 for (let i = 0; i <= formSchemaPromptAmount; i++) {
@@ -308,21 +318,28 @@ onMounted(() => {
     } else {
       sideinfo.value.style.top = `0px`
     }
-    
   }
 })
 
-const formdata = ref({})
 const onSubmit = handleSubmit((values) => {
-  formdata.value = values
-  console.log(formdata.value.topic)
+  return values
 })
 
 function submitForm(phase) {
-  console.log(phase)
+  onSubmit().then((values) => {
+    if (values) {
+      switch (phase) {
+        case 'plan':
+          writingBotStore.addPanelItem({
+            name: phase,
+            topic: values.topic,
+            plan: values.plan
+          })
+      }
+    }
+    console.log(toRaw(writingBotStore.getPanelHistory))
+  })
 }
-
-
 
 </script>
 
