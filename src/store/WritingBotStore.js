@@ -18,6 +18,11 @@ export const useWritingBotStore = defineStore('writingBotStore', {
   actions: {
     updatePanelItem(item) {
       this.panelHistory.push(item)
+    },
+    updatePanelProgress(pnum) {
+      if (pnum > this.panelProgress) {
+        this.panelProgress = pnum
+      }
     }
   }
 })

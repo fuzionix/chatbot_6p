@@ -31,6 +31,14 @@
               @submit.prevent="" 
               class="w-full [&>*:last-child]:border-none [&>*:last-child]:opacity-25 [&>*:last-child]:pointer-events-none [&>*:last-child]:select-none"
             >
+              <button 
+                ref="formbutton"
+                type="submit" 
+                class="hidden"
+                hidden
+              >
+              </button>
+            
               <!-- 1. Plan -->
               <Card class="mb-6">
                 <CardHeader>
@@ -47,7 +55,7 @@
                       <FormControl>
                         <div class="relative">
                           <Input 
-                            @input="submitForm('plan')"
+                            @input="updatePanel('plan')"
                             type="text" 
                             class="h-[50px] pl-6 pr-12 bg-theme-light text-md" 
                             placeholder="" 
@@ -99,7 +107,7 @@
                 </CardContent>
                 <CardFooter class="text-xs text-theme-black">
                   <Button 
-                    @click="submitForm('plan')" 
+                    @click="updatePanelProgress(1)" 
                     class="flex items-center w-full h-[40px] py-2 px-3 mb-2 rounded-lg"
                   >
                     <ClipboardCheck size="20" :strokeWidth="1.5" class="mr-8" />
@@ -109,7 +117,7 @@
               </Card>
 
               <!-- 2. Prompt -->
-              <Card class="mb-6">
+              <Card v-if="panelProgress >= 2" class="mb-6">
                 <CardHeader>
                   <CardTitle class="font-semibold text-base">
                     <Sparkles class="mb-2" />
@@ -140,16 +148,23 @@
                 <CardFooter class="text-xs text-theme-black">
                   <Button 
                     @click="$router.push('/demo')" 
-                    class="flex items-center w-full h-[40px] py-2 px-3 mb-2 rounded-lg"
+                    class="flex items-center w-full h-[40px] py-2 px-3 mb-2 mr-2 rounded-lg border border-x-theme-gridlight bg-white hover:bg-theme-light active:bg-theme-grid"
                   >
                     <MessageSquareText size="20" :strokeWidth="1.5" class="mr-8" />
                     <span class="font-medium text-sm">AI Chatbot</span>
+                  </Button>
+                  <Button 
+                    @click="updatePanelProgress(2)" 
+                    class="flex items-center w-full h-[40px] py-2 px-3 mb-2 ml-2 rounded-lg"
+                  >
+                    <ClipboardCheck size="20" :strokeWidth="1.5" class="mr-8" />
+                    <span class="font-medium text-sm">Okay, I Finished</span>
                   </Button>
                 </CardFooter>
               </Card>
 
               <!-- 3. Preview -->
-              <Card class="mb-6">
+              <Card v-if="panelProgress >= 3" class="mb-6">
                 <CardHeader>
                   <CardTitle class="font-semibold text-base">
                     <Eye class="mb-2" />
@@ -200,8 +215,8 @@
                 </CardContent>
                 <CardFooter class="text-xs text-theme-black">
                   <Button 
-                    @click="$router.push('/demo')" 
-                    class="flex items-center w-full h-[40px] py-2 px-3 mb-2 rounded-lg"
+                    @click="updatePanelProgress(3)" 
+                    class="flex items-center w-full h-[40px] py-2 px-3 mb-2 ml-2 rounded-lg"
                   >
                     <ClipboardCheck size="20" :strokeWidth="1.5" class="mr-8" />
                     <span class="font-medium text-sm">Okay, I Finished</span>
@@ -210,7 +225,7 @@
               </Card>
 
               <!-- 4. Produce -->
-              <Card class="mb-6">
+              <Card v-if="panelProgress >= 4" class="mb-6">
                 <CardHeader>
                   <CardTitle class="font-semibold text-base">
                     <BookOpenCheck class="mb-2" />
@@ -284,10 +299,12 @@ import axios from 'axios'
 
 const writingBotStore = useWritingBotStore()
 const panelHistory = toRaw(writingBotStore.getPanelHistory)
+const panelProgress = ref(writingBotStore.getPanelProgress + 2)
+
 const router = useRouter()
 const { toast } = useToast()
 
-const formSchemaPromptAmount = 4
+const formSchemaPromptAmount = 3
 const formSchemaObject = {
   topic: z.string().max(300 - 1, 'At most 300 charactors').default(panelHistory[0]?.topic),
   plan: z.string().max(1000 - 1, 'At most 1000 charactors').default(panelHistory[0]?.plan),
@@ -308,6 +325,7 @@ const { handleSubmit } = useForm({
 const connectError = ref(false)
 const connectErrorMessage = ref('')
 const sideinfo = ref(null)
+const formbutton = ref(null)
 
 onMounted(() => {
   const scroll = window.addEventListener("scroll", handleScroll)
@@ -326,7 +344,8 @@ const onSubmit = handleSubmit((values) => {
   return values
 })
 
-function submitForm(phase) {
+function updatePanel(phase) {
+  formbutton.value.click()
   onSubmit().then((values) => {
     console.log(values)
     if (values) {
@@ -341,6 +360,11 @@ function submitForm(phase) {
     }
     console.log(toRaw(writingBotStore.getPanelHistory))
   })
+}
+
+function updatePanelProgress(pnum) {
+  writingBotStore.updatePanelProgress(pnum)
+  panelProgress.value = writingBotStore.getPanelProgress + 2
 }
 
 </script>
