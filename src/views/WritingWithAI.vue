@@ -29,7 +29,7 @@
           <div class="flex">
             <form 
               @submit.prevent="" 
-              class="w-full [&>*:last-child]:border-none [&>*:last-child]:opacity-25 [&>*:last-child]:pointer-events-none [&>*:last-child]:select-none"
+              class="w-full [&>*]:duration-300 [&>*:last-child]:border-[#fff0] [&>*:last-child]:opacity-25 [&>*:last-child]:pointer-events-none [&>*:last-child]:select-none"
             >
               <button 
                 ref="formbutton"
@@ -40,7 +40,7 @@
               </button>
             
               <!-- 1. Plan -->
-              <Card class="mb-6">
+              <Card v-if="panelProgress >= 1" class="mb-6">
                 <CardHeader>
                   <CardTitle class="font-semibold text-base">
                     <ClipboardPenLine class="mb-2" />
@@ -60,7 +60,7 @@
                             class="h-[50px] pl-6 pr-12 bg-theme-light text-md" 
                             placeholder="" 
                             v-bind="componentField" 
-                            maxlength="300" 
+                            maxlength="100" 
                             autofocus 
                           />
                           <button type="submit" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
@@ -92,6 +92,7 @@
                       <FormLabel>Your Plan</FormLabel>
                       <FormControl>
                         <Textarea
+                          @input="updatePanel('plan')"
                           placeholder=""
                           class="bg-theme-light text-md"
                           rows="4"
@@ -135,7 +136,15 @@
                     <FormItem class="mb-4">
                       <FormControl>
                         <div class="relative">
-                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-sm z-0" :placeholder="`Prompt ${i}`" v-bind="componentField" maxlength="300" autofocus />
+                          <Input 
+                            @input="updatePanel('prompt')" 
+                            type="text" 
+                            class="h-[50px] pl-6 pr-12 bg-theme-light text-sm z-0" 
+                            :placeholder="`Prompt ${i}`" 
+                            v-bind="componentField" 
+                            maxlength="300" 
+                            autofocus 
+                          />
                           <button type="submit" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
                             <WandSparkles width="16" height="16" alt="" />
                           </button>
@@ -145,17 +154,17 @@
                     </FormItem>
                   </FormField>
                 </CardContent>
-                <CardFooter class="text-xs text-theme-black">
+                <CardFooter class="flex flex-col text-xs text-theme-black md:flex-row">
                   <Button 
                     @click="$router.push('/demo')" 
-                    class="flex items-center w-full h-[40px] py-2 px-3 mb-2 mr-2 rounded-lg border border-x-theme-gridlight bg-white hover:bg-theme-light active:bg-theme-grid"
+                    class="flex items-center w-full h-[40px] py-2 px-3 mb-2 md:mr-2 rounded-lg border border-x-theme-gridlight bg-white hover:bg-theme-light active:bg-theme-grid"
                   >
                     <MessageSquareText size="20" :strokeWidth="1.5" class="mr-8" />
                     <span class="font-medium text-sm">AI Chatbot</span>
                   </Button>
                   <Button 
                     @click="updatePanelProgress(2)" 
-                    class="flex items-center w-full h-[40px] py-2 px-3 mb-2 ml-2 rounded-lg"
+                    class="flex items-center w-full h-[40px] py-2 px-3 mb-2 md:ml-2 rounded-lg"
                   >
                     <ClipboardCheck size="20" :strokeWidth="1.5" class="mr-8" />
                     <span class="font-medium text-sm">Okay, I Finished</span>
@@ -186,6 +195,7 @@
                       </div>
                       <FormControl>
                         <Textarea
+                          @input="updatePanel('preview')"
                           placeholder=""
                           class="bg-theme-light text-md"
                           rows="10"
@@ -203,7 +213,15 @@
                       <FormLabel>Suggestion of Refinements</FormLabel>
                       <FormControl>
                         <div class="relative">
-                          <Input type="text" class="h-[50px] pl-6 pr-12 bg-theme-light text-md" placeholder="" v-bind="componentField" maxlength="300" autofocus />
+                          <Input 
+                            @input="updatePanel('preview')" 
+                            type="text" 
+                            class="h-[50px] pl-6 pr-12 bg-theme-light text-md" 
+                            placeholder="" 
+                            v-bind="componentField" 
+                            maxlength="300" 
+                            autofocus 
+                          />
                           <button type="submit" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
                             <WandSparkles width="16" height="16" alt="" />
                           </button>
@@ -216,7 +234,7 @@
                 <CardFooter class="text-xs text-theme-black">
                   <Button 
                     @click="updatePanelProgress(3)" 
-                    class="flex items-center w-full h-[40px] py-2 px-3 mb-2 ml-2 rounded-lg"
+                    class="flex items-center w-full h-[40px] py-2 px-3 mb-2 rounded-lg"
                   >
                     <ClipboardCheck size="20" :strokeWidth="1.5" class="mr-8" />
                     <span class="font-medium text-sm">Okay, I Finished</span>
@@ -252,6 +270,30 @@
                   </FormField>
                 </CardContent>
               </Card>
+
+              <div v-if="panelProgress >= 5" class="flex flex-col md:flex-row">
+                <!-- 5. Peer Review -->
+                <Card class="mb-6 flex-1 border-none">
+                  <CardHeader>
+                    <CardTitle class="font-semibold text-base">
+                      <UserRoundSearch class="mb-2" />
+                      <span>Peer Review</span>
+                    </CardTitle>
+                    <CardDescription>Please tell me the intended topic of your writing. I will guide you through the steps of the 6P pedagogy.</CardDescription>
+                  </CardHeader>
+                </Card>
+
+                <!-- 6. Portfolio Tracking -->
+                <Card class="mb-6 flex-1 border-none">
+                  <CardHeader>
+                    <CardTitle class="font-semibold text-base">
+                      <FolderOpen class="mb-2" />
+                      <span>Portfolio Tracking</span>
+                    </CardTitle>
+                    <CardDescription>Please tell me the intended topic of your writing. I will guide you through the steps of the 6P pedagogy.</CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
             </form>
           </div>
         </div>
@@ -288,7 +330,9 @@ import {
   ClipboardCheck,
   WandSparkles,
   Eye,
-  BookOpenCheck   
+  BookOpenCheck,
+  UserRoundSearch,
+  FolderOpen     
 } from 'lucide-vue-next'
 
 import { toTypedSchema } from '@vee-validate/zod'
@@ -306,13 +350,13 @@ const { toast } = useToast()
 
 const formSchemaPromptAmount = 3
 const formSchemaObject = {
-  topic: z.string().max(300 - 1, 'At most 300 charactors').default(panelHistory[0]?.topic),
-  plan: z.string().max(1000 - 1, 'At most 1000 charactors').default(panelHistory[0]?.plan),
-  preview: z.string().max(2000 - 1, 'At most 2000 charactors').optional(),
-  refinements: z.string().max(2000 - 1, 'At most 2000 charactors').optional(),
+  topic: z.string().min(1, 'Topic cannot be empty').max(100 - 1, 'At most 100 charactors').default(panelHistory[0]?.topic),
+  plan: z.string().min(1, 'Your plan cannot be empty').max(1000 - 1, 'At most 1000 charactors').default(panelHistory[0]?.plan),
+  preview: z.string().min(1, 'Preview cannot be empty').max(5000 - 1, 'At most 5000 charactors').optional(),
+  refinements: z.string().max(300 - 1, 'At most 300 charactors').optional(),
 }
 
-for (let i = 0; i <= formSchemaPromptAmount; i++) {
+for (let i = 1; i <= formSchemaPromptAmount; i++) {
   formSchemaObject[`prompt${i}`] = z.string().max(300 - 1, 'At most 300 charactors').optional()
 }
 
@@ -347,7 +391,7 @@ const onSubmit = handleSubmit((values) => {
 function updatePanel(phase) {
   formbutton.value.click()
   onSubmit().then((values) => {
-    console.log(values)
+    console.log('updatePanel', values)
     if (values) {
       switch (phase) {
         case 'plan':
@@ -356,6 +400,20 @@ function updatePanel(phase) {
             topic: values.topic,
             plan: values.plan
           })
+          break
+        case 'prompt':
+          writingBotStore.updatePanelItem({
+            name: phase,
+            ...Object.fromEntries(Object.entries(values).filter((v) => { return v[0].startsWith('prompt') }))
+          })
+          break
+        case 'preview':
+          writingBotStore.updatePanelItem({
+            name: phase,
+            preview: values.preview,
+            refinements: values.refinements
+          })
+          break
       }
     }
     console.log(toRaw(writingBotStore.getPanelHistory))
@@ -363,8 +421,14 @@ function updatePanel(phase) {
 }
 
 function updatePanelProgress(pnum) {
-  writingBotStore.updatePanelProgress(pnum)
-  panelProgress.value = writingBotStore.getPanelProgress + 2
+  formbutton.value.click()
+  onSubmit().then((values) => {
+    if (values) {
+      writingBotStore.updatePanelProgress(pnum)
+      panelProgress.value = writingBotStore.getPanelProgress + 2
+    }
+  })
+  
 }
 
 </script>
