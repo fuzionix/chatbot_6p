@@ -28,6 +28,9 @@ export const useWritingBotStore = defineStore('writingBotStore', {
       if (pnum > this.panelProgress) {
         this.panelProgress = pnum
       }
-    }
+    },
+    checkPanelHistoryEmpty(index) {
+      return !Object.values(this.panelHistory[index]).some((v) => !v)
+    },
   }
 })
