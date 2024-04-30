@@ -4,7 +4,8 @@ export const useWritingBotStore = defineStore('writingBotStore', {
   state: () => {
     return { 
       panelHistory: [],
-      panelProgress: 0
+      panelProgress: 0,
+      isPanelHistoryEmpty: []
     }
   },
   getters: {
@@ -13,6 +14,9 @@ export const useWritingBotStore = defineStore('writingBotStore', {
     },
     getPanelProgress() {
       return this.panelProgress
+    },
+    getIsPanelHistoryEmpty() {
+      return this.isPanelHistoryEmpty
     }
   },
   actions: {
@@ -29,8 +33,8 @@ export const useWritingBotStore = defineStore('writingBotStore', {
         this.panelProgress = pnum
       }
     },
-    checkPanelHistoryEmpty(index) {
-      return !Object.values(this.panelHistory[index]).some((v) => !v)
+    updatePanelHistoryEmpty(index) {
+      this.isPanelHistoryEmpty[index] = !Object.values(this.panelHistory[index]).some((v) => !v)
     },
   }
 })

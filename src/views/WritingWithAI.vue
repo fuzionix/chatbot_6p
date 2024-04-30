@@ -29,7 +29,13 @@
           <div class="flex">
             <form 
               @submit.prevent="" 
-              class="w-full [&>*]:duration-300 [&>*:last-child]:border-[#fff0] [&>*:last-child]:opacity-25 [&>*:last-child]:pointer-events-none [&>*:last-child]:select-none"
+              class="w-full [&>*]:duration-300"
+              :class="{ 
+                '[&>*:last-child]:border-[#fff0]': !panelFade,
+                '[&>*:last-child]:opacity-25': !panelFade,
+                '[&>*:last-child]:pointer-events-none': !panelFade,
+                '[&>*:last-child]:select-none': !panelFade,
+              }"
             >
               <button 
                 ref="formbutton"
@@ -108,7 +114,7 @@
                 </CardContent>
                 <CardFooter class="text-xs text-theme-black">
                   <Button 
-                    v-if="false"
+                    v-if="isPanelHistoryEmpty[0]"
                     @click="updatePanelProgress(1)" 
                     class="flex items-center w-full h-[40px] py-2 px-3 mb-2 rounded-lg"
                   >
@@ -157,6 +163,7 @@
                 </CardContent>
                 <CardFooter class="flex flex-col text-xs text-theme-black md:flex-row">
                   <Button 
+                    v-if="isPanelHistoryEmpty[1]"
                     @click="$router.push('/demo')" 
                     class="flex items-center w-full h-[40px] py-2 px-3 mb-2 md:mr-2 rounded-lg border border-x-theme-gridlight bg-white hover:bg-theme-light active:bg-theme-grid"
                   >
@@ -164,6 +171,7 @@
                     <span class="font-medium text-sm">AI Chatbot</span>
                   </Button>
                   <Button 
+                    v-if="isPanelHistoryEmpty[1]"
                     @click="updatePanelProgress(2)" 
                     class="flex items-center w-full h-[40px] py-2 px-3 mb-2 md:ml-2 rounded-lg"
                   >
@@ -234,6 +242,7 @@
                 </CardContent>
                 <CardFooter class="text-xs text-theme-black">
                   <Button 
+                    v-if="isPanelHistoryEmpty[2]"
                     @click="updatePanelProgress(3)" 
                     class="flex items-center w-full h-[40px] py-2 px-3 mb-2 rounded-lg"
                   >
@@ -306,7 +315,7 @@
 
 <script setup>
 import { useWritingBotStore } from '@/store/WritingBotStore'
-import { ref, toRaw, nextTick, onMounted } from 'vue'
+import { ref, toRaw, nextTick, watchEffect, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 import NavigationBar from '@/components/NavigationBar.vue'
@@ -345,6 +354,13 @@ import axios from 'axios'
 const writingBotStore = useWritingBotStore()
 const panelHistory = toRaw(writingBotStore.getPanelHistory)
 const panelProgress = ref(writingBotStore.getPanelProgress + 2)
+const finalPanelProgress = ref(5)
+const isPanelHistoryEmpty = writingBotStore.getIsPanelHistoryEmpty
+watchEffect(
+  () => writingBotStore.getIsPanelHistoryEmpty,
+  { deep: true } 
+)
+const panelFade = ref(panelProgress.value >= finalPanelProgress.value)
 
 const router = useRouter()
 const { toast } = useToast()
@@ -400,24 +416,26 @@ function updatePanel(phase) {
             topic: values.topic,
             plan: values.plan
           })
-          console.log(writingBotStore.checkPanelHistoryEmpty(0))
+          writingBotStore.updatePanelHistoryEmpty(0)
           break
         case 'prompt':
           writingBotStore.updatePanelItem({
             name: phase,
             ...Object.fromEntries(Object.entries(values).filter((v) => { return v[0].startsWith('prompt') }))
           })
-          console.log(writingBotStore.checkPanelHistoryEmpty(1))
+          writingBotStore.updatePanelHistoryEmpty(1)
           break
         case 'preview':
           writingBotStore.updatePanelItem({
             name: phase,
             preview: values.preview,
-            refinements: values.refinements
+            refinements: values.refinements ?? 'No refinements'
           })
-          console.log(writingBotStore.checkPanelHistoryEmpty(2))
+          writingBotStore.updatePanelHistoryEmpty(2)
           break
       }
+    } else {
+      console.error('Empty form values')
     }
   })
 }
@@ -428,6 +446,12 @@ function updatePanelProgress(pnum) {
     if (values) {
       writingBotStore.updatePanelProgress(pnum)
       panelProgress.value = writingBotStore.getPanelProgress + 2
+      
+      if (panelProgress.value >= finalPanelProgress.value) {
+        panelFade.value = true
+      }
+    } else {
+      console.error('Empty form values')
     }
   })
   
