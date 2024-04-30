@@ -17,7 +17,12 @@ export const useWritingBotStore = defineStore('writingBotStore', {
   },
   actions: {
     updatePanelItem(item) {
-      this.panelHistory.push(item)
+      const itemIndex = this.panelHistory.findIndex((pitem) => pitem['name'] === item['name'])
+      if (itemIndex === -1) {
+        this.panelHistory.push(item)
+      } else {
+        this.panelHistory[itemIndex] = item
+      }
     },
     updatePanelProgress(pnum) {
       if (pnum > this.panelProgress) {

@@ -350,14 +350,14 @@ const { toast } = useToast()
 
 const formSchemaPromptAmount = 3
 const formSchemaObject = {
-  topic: z.string().min(1, 'Topic cannot be empty').max(100 - 1, 'At most 100 charactors').default(panelHistory[0]?.topic),
-  plan: z.string().min(1, 'Your plan cannot be empty').max(1000 - 1, 'At most 1000 charactors').default(panelHistory[0]?.plan),
-  preview: z.string().min(1, 'Preview cannot be empty').max(5000 - 1, 'At most 5000 charactors').optional(),
-  refinements: z.string().max(300 - 1, 'At most 300 charactors').optional(),
+  topic: z.string().min(1, 'Topic cannot be empty').max(100 - 1, 'At most 100 charactors').optional().default(panelHistory[0]?.topic),
+  plan: z.string().min(1, 'Your plan cannot be empty').max(1000 - 1, 'At most 1000 charactors').optional().default(panelHistory[0]?.plan),
+  preview: z.string().min(1, 'Preview cannot be empty').max(5000 - 1, 'At most 5000 charactors').optional().default(panelHistory[2]?.preview),
+  refinements: z.string().max(300 - 1, 'At most 300 charactors').optional().default(panelHistory[2]?.refinements),
 }
 
 for (let i = 1; i <= formSchemaPromptAmount; i++) {
-  formSchemaObject[`prompt${i}`] = z.string().max(300 - 1, 'At most 300 charactors').optional()
+  formSchemaObject[`prompt${i}`] = z.string().max(300 - 1, 'At most 300 charactors').optional().default(panelHistory[1]?.[`prompt${i}`])
 }
 
 const formSchema = toTypedSchema(z.object(formSchemaObject))
@@ -391,7 +391,6 @@ const onSubmit = handleSubmit((values) => {
 function updatePanel(phase) {
   formbutton.value.click()
   onSubmit().then((values) => {
-    console.log('updatePanel', values)
     if (values) {
       switch (phase) {
         case 'plan':
@@ -416,7 +415,6 @@ function updatePanel(phase) {
           break
       }
     }
-    console.log(toRaw(writingBotStore.getPanelHistory))
   })
 }
 
