@@ -52,7 +52,7 @@
                     <ClipboardPenLine class="mb-2" />
                     <span>Plan</span>
                   </CardTitle>
-                  <CardDescription>Please tell me the intended topic of your writing. I will guide you through the steps of the 6P pedagogy.</CardDescription>
+                  <CardDescription>Please define the writing objectives, research question, or problem you aim to address.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <FormField v-slot="{ componentField }" name="topic">
@@ -62,6 +62,7 @@
                         <div class="relative">
                           <Input 
                             @input="updatePanel('plan')"
+                            @keyup.enter="sendPrompt(componentField.modelValue)"
                             type="text" 
                             class="h-[50px] pl-6 pr-12 bg-theme-light text-md" 
                             placeholder="" 
@@ -69,7 +70,7 @@
                             maxlength="100" 
                             autofocus 
                           />
-                          <button type="submit" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
+                          <button type="submit" @click="sendPrompt(componentField.modelValue)" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
                             <WandSparkles width="16" height="16" alt="" />
                           </button>
                         </div>
@@ -89,7 +90,7 @@
                         </button>
                       </div>
                       
-                      <div class="!mb-8 !mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</div>
+                      <div class="!mb-8 !mt-4">{{ planningApproach }}</div>
                       <FormMessage />
                     </FormItem>
                   </FormField>
@@ -106,7 +107,7 @@
                         />
                       </FormControl>
                       <FormDescription class="text-xs">
-                        Plan the content and structure of the writing
+                        Outline the content and structure of the writing, considering the intended audience and purpose.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -131,7 +132,7 @@
                     <Sparkles class="mb-2" />
                     <span>Prompt</span>
                   </CardTitle>
-                  <CardDescription>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et.</CardDescription>
+                  <CardDescription>Create questions that can facilitate inquiry and further exploration of the topic.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <FormField 
@@ -147,7 +148,7 @@
                             @input="updatePanel('prompt')" 
                             type="text" 
                             class="h-[50px] pl-6 pr-12 bg-theme-light text-sm z-0" 
-                            :placeholder="`Prompt ${i}`" 
+                            :placeholder="`Question ${i}`" 
                             v-bind="componentField" 
                             maxlength="300" 
                             autofocus 
@@ -188,7 +189,7 @@
                     <Eye class="mb-2" />
                     <span>Preview</span>
                   </CardTitle>
-                  <CardDescription>Please tell me the intended topic of your writing. I will guide you through the steps of the 6P pedagogy.</CardDescription>
+                  <CardDescription>Review the output from the AI-generated content, checking for accuracy, coherence, and alignment with your writing objectives.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <FormField v-slot="{ componentField }" name="preview">
@@ -236,6 +237,9 @@
                           </button>
                         </div>
                       </FormControl>
+                      <FormDescription>
+                        <span class="text-xs">Supplement the content with your own knowledge, additional research, and alternative perspectives.</span>
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   </FormField>
@@ -259,7 +263,7 @@
                     <BookOpenCheck class="mb-2" />
                     <span>Produce</span>
                   </CardTitle>
-                  <CardDescription>Please tell me the intended topic of your writing. I will guide you through the steps of the 6P pedagogy.</CardDescription>
+                  <CardDescription>Done. Be sure to integrate relevant academic sources and properly cite all references.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <FormField name="">
@@ -289,7 +293,9 @@
                       <UserRoundSearch class="mb-2" />
                       <span>Peer Review</span>
                     </CardTitle>
-                    <CardDescription>Please tell me the intended topic of your writing. I will guide you through the steps of the 6P pedagogy.</CardDescription>
+                    <CardDescription>
+                      Exchange your written assignments with your peers for review and feedback. And consider the feedback and make necessary revisions.
+                    </CardDescription>
                   </CardHeader>
                 </Card>
 
@@ -300,7 +306,7 @@
                       <FolderOpen class="mb-2" />
                       <span>Portfolio Tracking</span>
                     </CardTitle>
-                    <CardDescription>Please tell me the intended topic of your writing. I will guide you through the steps of the 6P pedagogy.</CardDescription>
+                    <CardDescription>Reflect on your writing and learning process, including the use of AI-enabled text-generating tools.</CardDescription>
                   </CardHeader>
                 </Card>
               </div>
@@ -351,6 +357,8 @@ import * as z from 'zod'
 
 import axios from 'axios'
 
+const api_key = import.meta.env.VITE_APP_REPLICATE_API_TOKEN
+
 const writingBotStore = useWritingBotStore()
 const panelHistory = toRaw(writingBotStore.getPanelHistory)
 const panelProgress = ref(writingBotStore.getPanelProgress + 2)
@@ -358,9 +366,9 @@ const finalPanelProgress = ref(5)
 const isPanelHistoryEmpty = writingBotStore.getIsPanelHistoryEmpty
 watchEffect(
   () => writingBotStore.getIsPanelHistoryEmpty,
-  { deep: true } 
 )
 const panelFade = ref(panelProgress.value >= finalPanelProgress.value)
+const planningApproach = writingBotStore.getPlanningApproach
 
 const router = useRouter()
 const { toast } = useToast()
@@ -455,6 +463,73 @@ function updatePanelProgress(pnum) {
     }
   })
   
+}
+
+function sendPrompt(textInput) {
+  axios({
+    method: 'post',
+    url: '/api',
+    data: {
+      input: {
+        top_p: 1,
+        prompt: textInput,
+        temperature: 0.5,
+        system_prompt: "Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.",
+        length_penalty: 1,
+        max_new_tokens: 500,
+        min_new_tokens: -1,
+        prompt_template: "<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n{prompt} [/INST]",
+        presence_penalty: 0
+      }
+    },
+    headers: {
+      'Authorization': `Bearer ${api_key}`,
+      'Content-Type': 'application/json'
+    },
+  }).then(async (response) => {
+    console.log('sendPrompt', response)
+    getPredictions(response.data.id)
+  }).catch((error) => {
+    console.error(error)
+  }).finally(() => {
+  })
+}
+
+// TODO: Limit Maximum Trial
+async function getPredictions(predictionId) {
+  try {
+    await axios({
+      method: 'get',
+      url: `/get/${predictionId}`,
+      headers: {
+        'Authorization': `Bearer ${api_key}`
+      },
+    }).then(async (response) => {
+      const data = response.data
+      const updateRate = 500
+
+      console.log('getPredictions', response)
+
+      // Check if predictions are succeeded
+      if (data.status === 'succeeded') {
+        writingBotStore.updatePlanningApproach(data.output.join(""))
+      } else if (data.status === 'processing' || data.status === 'starting') {
+        await delay(updateRate)
+        await getPredictions(predictionId)
+      } else {
+        throw new Error('Unknown response status')
+      }
+    }).catch((error) => {
+      console.error(error)
+    }).finally(() => {
+    })
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 </script>
