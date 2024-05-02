@@ -62,7 +62,7 @@
                         <div class="relative">
                           <Input 
                             @input="updatePanel('plan')"
-                            @keyup.enter="sendPrompt(componentField.modelValue)"
+                            @keyup.enter="sendPrompt(componentField.modelValue, 'planningApproach')"
                             type="text" 
                             class="h-[50px] pl-6 pr-12 bg-theme-light text-md" 
                             placeholder="" 
@@ -70,7 +70,7 @@
                             maxlength="100" 
                             autofocus 
                           />
-                          <button type="submit" @click="sendPrompt(componentField.modelValue)" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
+                          <button type="submit" @click="sendPrompt(componentField.modelValue, 'planningApproach')" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
                             <WandSparkles width="16" height="16" alt="" />
                           </button>
                         </div>
@@ -79,7 +79,17 @@
                     </FormItem>
                   </FormField>
                   <FormField name="">
-                    <FormItem>
+                    <FormItem v-if="predictionsLoading['planningApproach'] === true" class="flex w-full justify-center">
+                      <div class="!mb-8 !mt-4 pt-4">
+                        <img 
+                          src="@/assets/icon/loader.svg" 
+                          class="w-8"
+                          alt="" 
+                          width="32"
+                        >
+                      </div>
+                    </FormItem>
+                    <FormItem v-if="'planningApproach' in predictions">
                       <div class="flex justify-between items-center">
                         <FormLabel>Planning Approach</FormLabel>
                         <button 
@@ -90,12 +100,14 @@
                         </button>
                       </div>
                       
-                      <div class="!mb-8 !mt-4">{{ planningApproach }}</div>
+                      <div class="!mb-8 !mt-4 pt-4">
+                        <pre>{{ predictions['planningApproach'] }}</pre>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   </FormField>
                   <FormField v-slot="{ componentField }" name="plan">
-                    <FormItem class="pt-6 border-t border-t-theme-gray">
+                    <FormItem class="pt-6 border-t border-t-theme-gray border-dashed">
                       <FormLabel>Your Plan</FormLabel>
                       <FormControl>
                         <Textarea
@@ -321,6 +333,7 @@
 
 <script setup>
 import { useWritingBotStore } from '@/store/WritingBotStore'
+import { usePromptStore } from '@/store/PromptStore'
 import { ref, toRaw, nextTick, watchEffect, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -360,6 +373,7 @@ import axios from 'axios'
 const api_key = import.meta.env.VITE_APP_REPLICATE_API_TOKEN
 
 const writingBotStore = useWritingBotStore()
+const promptStore = usePromptStore()
 const panelHistory = toRaw(writingBotStore.getPanelHistory)
 const panelProgress = ref(writingBotStore.getPanelProgress + 2)
 const finalPanelProgress = ref(5)
@@ -368,7 +382,9 @@ watchEffect(
   () => writingBotStore.getIsPanelHistoryEmpty,
 )
 const panelFade = ref(panelProgress.value >= finalPanelProgress.value)
-const planningApproach = writingBotStore.getPlanningApproach
+const predictions = writingBotStore.getPredictions
+const predictionsLoading = ref({})
+const promptList = promptStore.getPrompt
 
 const router = useRouter()
 const { toast } = useToast()
@@ -465,7 +481,8 @@ function updatePanelProgress(pnum) {
   
 }
 
-function sendPrompt(textInput) {
+function sendPrompt(textInput = '', field = '') {
+  predictionsLoading.value[field] = true
   axios({
     method: 'post',
     url: '/api',
@@ -474,12 +491,11 @@ function sendPrompt(textInput) {
         top_p: 1,
         prompt: textInput,
         temperature: 0.5,
-        system_prompt: "Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.",
-        length_penalty: 1,
-        max_new_tokens: 500,
+        max_new_tokens: 512,
         min_new_tokens: -1,
-        prompt_template: "<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n{prompt} [/INST]",
-        presence_penalty: 0
+        prompt_template: "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\\n\\nYour answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.<|eot_id|><|start_header_id|>user<|end_header_id|>\\n\\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\\n\\n",
+        presence_penalty: 1,
+        frequency_penalty: 0.2
       }
     },
     headers: {
@@ -487,7 +503,6 @@ function sendPrompt(textInput) {
       'Content-Type': 'application/json'
     },
   }).then(async (response) => {
-    console.log('sendPrompt', response)
     getPredictions(response.data.id)
   }).catch((error) => {
     console.error(error)
@@ -508,11 +523,10 @@ async function getPredictions(predictionId) {
       const data = response.data
       const updateRate = 500
 
-      console.log('getPredictions', response)
-
       // Check if predictions are succeeded
       if (data.status === 'succeeded') {
-        writingBotStore.updatePlanningApproach(data.output.join(""))
+        predictions.value = writingBotStore.updatePredictions(data.output.join(""), 'planningApproach')
+        predictionsLoading.value['planningApproach'] = false
       } else if (data.status === 'processing' || data.status === 'starting') {
         await delay(updateRate)
         await getPredictions(predictionId)

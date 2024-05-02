@@ -276,14 +276,13 @@ export default {
             data: {
               input: {
                 top_p: 1,
-                prompt: prompt,
+                prompt: textInput,
                 temperature: 0.5,
-                system_prompt: "Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.",
-                length_penalty: 1,
-                max_new_tokens: 500,
+                max_new_tokens: 512,
                 min_new_tokens: -1,
-                prompt_template: "<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n\n{prompt} [/INST]",
-                presence_penalty: 0
+                prompt_template: "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\\n\\nYour answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.<|eot_id|><|start_header_id|>user<|end_header_id|>\\n\\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\\n\\n",
+                presence_penalty: 1,
+                frequency_penalty: 0.2
               }
             },
             headers: {

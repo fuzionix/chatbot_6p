@@ -17,7 +17,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://api.replicate.com/v1/models/meta/llama-2-70b-chat/predictions',
+        target: 'https://api.replicate.com/v1/models/meta/meta-llama-3-70b-instruct/predictions',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ''),

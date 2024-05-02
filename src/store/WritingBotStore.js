@@ -6,7 +6,7 @@ export const useWritingBotStore = defineStore('writingBotStore', {
       panelHistory: [],
       panelProgress: 0,
       isPanelHistoryEmpty: [],
-      planningApproach: ""
+      predictions: {}
     }
   },
   getters: {
@@ -19,8 +19,8 @@ export const useWritingBotStore = defineStore('writingBotStore', {
     getIsPanelHistoryEmpty() {
       return this.isPanelHistoryEmpty
     },
-    getPlanningApproach() {
-      return this.planningApproach
+    getPredictions() {
+      return this.predictions
     }
   },
   actions: {
@@ -40,8 +40,9 @@ export const useWritingBotStore = defineStore('writingBotStore', {
     updatePanelHistoryEmpty(index) {
       this.isPanelHistoryEmpty[index] = !Object.values(this.panelHistory[index]).some((v) => !v)
     },
-    updatePlanningApproach(output) {
-      this.planningApproach = output
+    updatePredictions(output, field) {
+      this.predictions[field] = output
+      return this.predictions
     }
   }
 })
