@@ -412,6 +412,8 @@ const connectErrorMessage = ref('')
 const sideinfo = ref(null)
 const formbutton = ref(null)
 
+const llmLoading = ref(false)
+
 onMounted(() => {
   const scroll = window.addEventListener("scroll", handleScroll)
   const resize = window.addEventListener("resize", handleScroll)
@@ -482,32 +484,35 @@ function updatePanelProgress(pnum) {
 }
 
 function sendPrompt(textInput = '', field = '') {
-  predictionsLoading.value[field] = true
-  axios({
-    method: 'post',
-    url: '/api',
-    data: {
-      input: {
-        top_p: 1,
-        prompt: promptList[field] + "Topic of the writing: " + textInput,
-        temperature: 0.5,
-        max_new_tokens: 512,
-        min_new_tokens: -1,
-        prompt_template: "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\\n\\nYou are a professional instructor to insist students for academic writing using 6-P pedagogical approach. The 6-P pedagogical approach of 'Plan writing, Prompt questions and text, Preview draft(s), Produce an assignment, Peer review, and Portfolio tracking' promotes the productive use of Artificial Intelligence(AI)-enabled text-generating tools for the development of critical and/or reflective thinking by students. There are six phases, not necessarily sequential, but interactive and iterative in nature, when using AI-enabled text-generating tools for academic writing. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.<|eot_id|><|start_header_id|>user<|end_header_id|>\\n\\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\\n\\n",
-        presence_penalty: 1,
-        frequency_penalty: 0.2
-      }
-    },
-    headers: {
-      'Authorization': `Bearer ${api_key}`,
-      'Content-Type': 'application/json'
-    },
-  }).then(async (response) => {
-    getPredictions(response.data.id)
-  }).catch((error) => {
-    console.error(error)
-  }).finally(() => {
-  })
+  if (!llmLoading.value) {
+    llmLoading.value = true
+    predictionsLoading.value[field] = true
+    axios({
+      method: 'post',
+      url: '/api',
+      data: {
+        input: {
+          top_p: 1,
+          prompt: createPrompt(textInput, field),
+          temperature: 0.5,
+          max_new_tokens: 512,
+          min_new_tokens: -1,
+          prompt_template: "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\\n\\nYou are a professional instructor to insist students for academic writing using 6-P pedagogical approach. The 6-P pedagogical approach of 'Plan writing, Prompt questions and text, Preview draft(s), Produce an assignment, Peer review, and Portfolio tracking' promotes the productive use of Artificial Intelligence(AI)-enabled text-generating tools for the development of critical and/or reflective thinking by students. There are six phases, not necessarily sequential, but interactive and iterative in nature, when using AI-enabled text-generating tools for academic writing. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.<|eot_id|><|start_header_id|>user<|end_header_id|>\\n\\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\\n\\n",
+          presence_penalty: 1,
+          frequency_penalty: 0.2
+        }
+      },
+      headers: {
+        'Authorization': `Bearer ${api_key}`,
+        'Content-Type': 'application/json'
+      },
+    }).then(async (response) => {
+      getPredictions(response.data.id)
+    }).catch((error) => {
+      console.error(error)
+    }).finally(() => {
+    })
+  }
 }
 
 // TODO: Limit Maximum Trial
@@ -522,11 +527,13 @@ async function getPredictions(predictionId) {
     }).then(async (response) => {
       const data = response.data
       const updateRate = 500
+      llmLoading.value = true
 
       // Check if predictions are succeeded
       if (data.status === 'succeeded') {
         predictions.value = writingBotStore.updatePredictions(data.output.join(""), 'planningApproach')
         predictionsLoading.value['planningApproach'] = false
+        llmLoading.value = false
       } else if (data.status === 'processing' || data.status === 'starting') {
         await delay(updateRate)
         await getPredictions(predictionId)
@@ -536,10 +543,24 @@ async function getPredictions(predictionId) {
     }).catch((error) => {
       console.error(error)
     }).finally(() => {
+      llmLoading.value = false
     })
   } catch (error) {
     console.error(error)
   }
+}
+
+function createPrompt(textInput = '', field = '') {
+  let promptResult = ''
+
+  switch (field) {
+    case 'planningApproach':
+      promptResult += `${promptList[field]} \n`
+      promptResult += `Topic of the writing: ${textInput}`
+      break
+  }
+  
+  return promptResult
 }
 
 function delay(ms) {
