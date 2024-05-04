@@ -49,7 +49,13 @@
               <Card v-if="panelProgress >= 1" class="mb-6">
                 <CardHeader>
                   <CardTitle class="font-semibold text-base">
-                    <ClipboardPenLine class="mb-2" />
+                    <div class="flex justify-between">
+                      <ClipboardPenLine class="mb-2" />
+                      <Loader 
+                        v-if="predictionsLoading['planningApproach'] === true" 
+                        class="mb-2 animate-spin" 
+                      />
+                    </div>
                     <span>Plan</span>
                   </CardTitle>
                   <CardDescription>Please define the writing objectives, research question, or problem you aim to address.</CardDescription>
@@ -79,22 +85,12 @@
                     </FormItem>
                   </FormField>
                   <FormField name="">
-                    <FormItem v-if="predictionsLoading['planningApproach'] === true" class="flex w-full justify-center">
-                      <div class="!mb-8 !mt-4 pt-4">
-                        <img 
-                          src="@/assets/icon/loader.svg" 
-                          class="w-8"
-                          alt="" 
-                          width="32"
-                        >
-                      </div>
-                    </FormItem>
                     <FormItem v-if="'planningApproach' in predictions">
                       <div class="flex justify-between items-center">
                         <FormLabel>Planning Approach</FormLabel>
                         <button 
                           class="hover:-rotate-180 duration-200"
-                          @click.prevent=""
+                          @click.prevent="createPrompt('planningApproach')"
                         >
                           <RotateCcw width="16" height="16" />
                         </button>
@@ -141,7 +137,13 @@
               <Card v-if="panelProgress >= 2" class="mb-6">
                 <CardHeader>
                   <CardTitle class="font-semibold text-base">
-                    <Sparkles class="mb-2" />
+                    <div class="flex justify-between">
+                      <Sparkles class="mb-2" />
+                      <!-- <Loader 
+                        v-if="predictionsLoading['planningApproach'] === true" 
+                        class="mb-2 animate-spin" 
+                      /> -->
+                    </div>
                     <span>Prompt</span>
                   </CardTitle>
                   <CardDescription>Create questions that can facilitate inquiry and further exploration of the topic.</CardDescription>
@@ -198,7 +200,13 @@
               <Card v-if="panelProgress >= 3" class="mb-6">
                 <CardHeader>
                   <CardTitle class="font-semibold text-base">
-                    <Eye class="mb-2" />
+                    <div class="flex justify-between">
+                      <Eye class="mb-2" />
+                      <Loader 
+                        v-if="predictionsLoading['preview'] === true" 
+                        class="mb-2 animate-spin" 
+                      />
+                    </div>
                     <span>Preview</span>
                   </CardTitle>
                   <CardDescription>Review the output from the AI-generated content, checking for accuracy, coherence, and alignment with your writing objectives.</CardDescription>
@@ -210,7 +218,7 @@
                         <FormLabel>Preview Panel</FormLabel>
                         <button 
                           class="hover:-rotate-180 duration-200"
-                          @click.prevent=""
+                          @click.prevent="createPrompt('preview')"
                         >
                           <RotateCcw width="16" height="16" />
                         </button>
@@ -356,7 +364,8 @@ import {
   Eye,
   BookOpenCheck,
   UserRoundSearch,
-  FolderOpen     
+  FolderOpen,
+  Loader      
 } from 'lucide-vue-next'
 
 import { toTypedSchema } from '@vee-validate/zod'
@@ -488,8 +497,6 @@ function createPrompt(field = '') {
       promptResult += `Topic of the writing: ${panelHistory[0].topic} \n`
       promptResult += `Writing Plan: ${panelHistory[0].plan}`
   }
-
-  console.log(promptResult)
   
   sendPrompt(promptResult, field)
 }
@@ -506,8 +513,8 @@ function sendPrompt(prompt = '', field = '') {
           top_p: 1,
           prompt: prompt,
           temperature: 0.5,
-          max_new_tokens: 1024,
-          min_new_tokens: -1,
+          max_tokens: 1024,
+          min_tokens: 0,
           prompt_template: "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\\n\\nYou are a professional instructor to insist students for academic writing using 6-P pedagogical approach. The 6-P pedagogical approach of 'Plan writing, Prompt questions and text, Preview draft(s), Produce an assignment, Peer review, and Portfolio tracking' promotes the productive use of Artificial Intelligence(AI)-enabled text-generating tools for the development of critical and/or reflective thinking by students. There are six phases, not necessarily sequential, but interactive and iterative in nature, when using AI-enabled text-generating tools for academic writing. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.<|eot_id|><|start_header_id|>user<|end_header_id|>\\n\\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\\n\\n",
           presence_penalty: 1,
           frequency_penalty: 0.2
@@ -543,9 +550,12 @@ async function getPredictions(predictionId, field = '') {
       // Check if predictions are succeeded
       if (data.status === 'succeeded') {
         predictions.value = writingBotStore.updatePredictions(data.output.join(""), field)
-        predictionsLoading.value['planningApproach'] = false
+        predictionsLoading.value[field] = false
         llmLoading.value = false
       } else if (data.status === 'processing' || data.status === 'starting') {
+        if (data.status === 'processing') {
+          predictions.value = writingBotStore.updatePredictions(data.output.join(""), field)
+        }
         await delay(updateRate)
         await getPredictions(predictionId, field)
       } else {
@@ -564,5 +574,4 @@ async function getPredictions(predictionId, field = '') {
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
-
 </script>
