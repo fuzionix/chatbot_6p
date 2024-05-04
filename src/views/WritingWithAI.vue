@@ -62,7 +62,7 @@
                         <div class="relative">
                           <Input 
                             @input="updatePanel('plan')"
-                            @keyup.enter="sendPrompt(componentField.modelValue, 'planningApproach')"
+                            @keyup.enter="createPrompt('planningApproach')"
                             type="text" 
                             class="h-[50px] pl-6 pr-12 bg-theme-light text-md" 
                             placeholder="" 
@@ -70,7 +70,7 @@
                             maxlength="100" 
                             autofocus 
                           />
-                          <button type="submit" @click="sendPrompt(componentField.modelValue, 'planningApproach')" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
+                          <button type="submit" @click="createPrompt('planningApproach')" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
                             <WandSparkles width="16" height="16" alt="" />
                           </button>
                         </div>
@@ -185,7 +185,7 @@
                   </Button>
                   <Button 
                     v-if="isPanelHistoryEmpty[1]"
-                    @click="updatePanelProgress(2)" 
+                    @click="updatePanelProgress(2); createPrompt('preview')" 
                     class="flex items-center w-full h-[40px] py-2 px-3 mb-2 md:ml-2 rounded-lg"
                   >
                     <ClipboardCheck size="20" :strokeWidth="1.5" class="mr-8" />
@@ -204,7 +204,7 @@
                   <CardDescription>Review the output from the AI-generated content, checking for accuracy, coherence, and alignment with your writing objectives.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <FormField v-slot="{ componentField }" name="preview">
+                  <FormField name="">
                     <FormItem class="mb-8">
                       <div class="flex justify-between items-center">
                         <FormLabel>Preview Panel</FormLabel>
@@ -215,15 +215,10 @@
                           <RotateCcw width="16" height="16" />
                         </button>
                       </div>
-                      <FormControl>
-                        <Textarea
-                          @input="updatePanel('preview')"
-                          placeholder=""
-                          class="bg-theme-light text-md"
-                          rows="10"
-                          v-bind="componentField"
-                        />
-                      </FormControl>
+                      <div class="!mb-8 !mt-4 pt-4">
+                        <pre>{{ predictions['preview'] }}</pre>
+                      </div>
+                      <FormMessage />
                       <FormDescription>
                         <span class="text-xs">The result will be automatically generated, but you can still make edits to it.</span>
                       </FormDescription>
@@ -231,7 +226,7 @@
                     </FormItem>
                   </FormField>
                   <FormField v-slot="{ componentField }" name="refinements">
-                    <FormItem class="mb-8">
+                    <FormItem class="pt-6 border-t border-t-theme-gray border-dashed">
                       <FormLabel>Suggestion of Refinements</FormLabel>
                       <FormControl>
                         <div class="relative">
@@ -393,7 +388,6 @@ const formSchemaPromptAmount = 3
 const formSchemaObject = {
   topic: z.string().optional().default(panelHistory[0]?.topic),
   plan: z.string().optional().default(panelHistory[0]?.plan),
-  preview: z.string().optional().default(panelHistory[2]?.preview),
   refinements: z.string().optional().default(panelHistory[2]?.refinements),
 }
 
@@ -454,7 +448,6 @@ function updatePanel(phase) {
         case 'preview':
           writingBotStore.updatePanelItem({
             name: phase,
-            preview: values.preview,
             refinements: values.refinements ?? 'No refinements'
           })
           writingBotStore.updatePanelHistoryEmpty(2)
@@ -483,7 +476,25 @@ function updatePanelProgress(pnum) {
   
 }
 
-function sendPrompt(textInput = '', field = '') {
+function createPrompt(field = '') {
+  let promptResult = ''
+  promptResult += `${promptList[field]} \n`
+
+  switch (field) {
+    case 'planningApproach':
+      promptResult += `Topic of the writing: ${panelHistory[0].topic}`
+      break
+    case 'preview':
+      promptResult += `Topic of the writing: ${panelHistory[0].topic} \n`
+      promptResult += `Writing Plan: ${panelHistory[0].plan}`
+  }
+
+  console.log(promptResult)
+  
+  sendPrompt(promptResult, field)
+}
+
+function sendPrompt(prompt = '', field = '') {
   if (!llmLoading.value) {
     llmLoading.value = true
     predictionsLoading.value[field] = true
@@ -493,9 +504,9 @@ function sendPrompt(textInput = '', field = '') {
       data: {
         input: {
           top_p: 1,
-          prompt: createPrompt(textInput, field),
+          prompt: prompt,
           temperature: 0.5,
-          max_new_tokens: 512,
+          max_new_tokens: 1024,
           min_new_tokens: -1,
           prompt_template: "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\\n\\nYou are a professional instructor to insist students for academic writing using 6-P pedagogical approach. The 6-P pedagogical approach of 'Plan writing, Prompt questions and text, Preview draft(s), Produce an assignment, Peer review, and Portfolio tracking' promotes the productive use of Artificial Intelligence(AI)-enabled text-generating tools for the development of critical and/or reflective thinking by students. There are six phases, not necessarily sequential, but interactive and iterative in nature, when using AI-enabled text-generating tools for academic writing. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.<|eot_id|><|start_header_id|>user<|end_header_id|>\\n\\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\\n\\n",
           presence_penalty: 1,
@@ -507,7 +518,7 @@ function sendPrompt(textInput = '', field = '') {
         'Content-Type': 'application/json'
       },
     }).then(async (response) => {
-      getPredictions(response.data.id)
+      getPredictions(response.data.id, field)
     }).catch((error) => {
       console.error(error)
     }).finally(() => {
@@ -516,7 +527,7 @@ function sendPrompt(textInput = '', field = '') {
 }
 
 // TODO: Limit Maximum Trial
-async function getPredictions(predictionId) {
+async function getPredictions(predictionId, field = '') {
   try {
     await axios({
       method: 'get',
@@ -531,12 +542,12 @@ async function getPredictions(predictionId) {
 
       // Check if predictions are succeeded
       if (data.status === 'succeeded') {
-        predictions.value = writingBotStore.updatePredictions(data.output.join(""), 'planningApproach')
+        predictions.value = writingBotStore.updatePredictions(data.output.join(""), field)
         predictionsLoading.value['planningApproach'] = false
         llmLoading.value = false
       } else if (data.status === 'processing' || data.status === 'starting') {
         await delay(updateRate)
-        await getPredictions(predictionId)
+        await getPredictions(predictionId, field)
       } else {
         throw new Error('Unknown response status')
       }
@@ -550,25 +561,8 @@ async function getPredictions(predictionId) {
   }
 }
 
-function createPrompt(textInput = '', field = '') {
-  let promptResult = ''
-
-  switch (field) {
-    case 'planningApproach':
-      promptResult += `${promptList[field]} \n`
-      promptResult += `Topic of the writing: ${textInput}`
-      break
-  }
-  
-  return promptResult
-}
-
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 </script>
-
-<style>
-
-</style>
