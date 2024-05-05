@@ -505,6 +505,9 @@ function sendPrompt(prompt = '', field = '') {
   if (!llmLoading.value) {
     llmLoading.value = true
     predictionsLoading.value[field] = true
+    connectError.value = false
+    connectErrorMessage.value = ''
+
     axios({
       method: 'post',
       url: '/api',
@@ -527,6 +530,10 @@ function sendPrompt(prompt = '', field = '') {
     }).then(async (response) => {
       getPredictions(response.data.id, field)
     }).catch((error) => {
+      connectError.value = true
+      connectErrorMessage.value = `${error.name}: ${error.message}`
+      llmLoading.value = false
+      predictionsLoading.value[field] = false
       console.error(error)
     }).finally(() => {
     })
@@ -562,6 +569,9 @@ async function getPredictions(predictionId, field = '') {
         throw new Error('Unknown response status')
       }
     }).catch((error) => {
+      connectError.value = true
+      connectErrorMessage.value = `${error.name}: ${error.message}`
+      predictionsLoading.value[field] = false
       console.error(error)
     }).finally(() => {
       llmLoading.value = false

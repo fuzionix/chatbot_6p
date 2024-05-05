@@ -1,6 +1,6 @@
 <template>
   <section id="demo-page" class="absolute w-full h-full overflow-hidden grid-background">
-    <sidemenu />
+    <sidemenu @sendMessageFromQuestion="sendMessageFromQuestion" />
     <main 
       :class="store.sidemenuStatus ? '' : 'md:!pl-0'"
       class="w-full h-[100dvh] duration-300 md:pl-[--menu] xl:pr-[--info]"
@@ -240,7 +240,7 @@ export default {
         this.fillIcon = status
       },
       sendMessage(textInput, refresh = false) {
-        if (textInput && !this.isActive) {
+        if (textInput && !this.isActive && !this.chatLoading) {
           this.isActive = true
 
           if (this.chatHistory.slice(-1)[0]?.['danger'] == true) {
@@ -278,8 +278,8 @@ export default {
                 top_p: 1,
                 prompt: textInput,
                 temperature: 0.5,
-                max_new_tokens: 512,
-                min_new_tokens: -1,
+                max_tokens: 1024,
+                min_tokens: 0,
                 prompt_template: "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\\n\\nYour answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.<|eot_id|><|start_header_id|>user<|end_header_id|>\\n\\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\\n\\n",
                 presence_penalty: 1,
                 frequency_penalty: 0.2
@@ -299,10 +299,10 @@ export default {
               user: false,
               danger: true
             })
+            this.chatLoading = false
           }).finally(() => {
             this.scrollToBottom()
             this.isActive = false
-            this.chatLoading = false
           })
 
           this.userTextInputTemp = this.userTextInput
@@ -310,6 +310,9 @@ export default {
           this.scrollToBottom()
         }
         
+      },
+      sendMessageFromQuestion(value) {
+        this.sendMessage(value)
       },
       createPrompt(chatHistory = []) {
         let promptResult = ''

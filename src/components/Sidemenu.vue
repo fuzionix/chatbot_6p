@@ -40,24 +40,14 @@
       </div>
       
       <div class="my-4 border-y border-y-theme-gridlight">
-        <button class="group relative flex flex-col justify-center w-full px-10 py-2 border-b border-b-theme-gridlight hover:bg-theme-light last:border-0">
-          <h3 class="pb-2 text-sm font-semibold max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis">Question 1</h3>
-          <p class="text-xs text-left opacity-70">Urna porttitor rhoncus dolor purus non enim. Ipsum dolor sit amet consectetur adipiscing.</p>
-          <img src="@/assets/icon/more_square.svg" class="hidden absolute right-2 top-2 w-5 rounded-full group-hover:block hover:bg-[#0001] active:bg-theme-darklight" alt="more">
-        </button>
-        <button class="group relative flex flex-col justify-center w-full px-10 py-2 border-b border-b-theme-gridlight hover:bg-theme-light last:border-0">
-          <h3 class="pb-2 text-sm font-semibold max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis">Question 2</h3>
-          <p class="text-xs text-left opacity-70">Ut lectus arcu bibendum at varius vel pharetra.</p>
-          <img src="@/assets/icon/more_square.svg" class="hidden absolute right-2 top-2 w-5 rounded-full group-hover:block hover:bg-[#0001] active:bg-theme-darklight" alt="more">
-        </button>
-        <button class="group relative flex flex-col justify-center w-full px-10 py-2 border-b border-b-theme-gridlight hover:bg-theme-light last:border-0">
-          <h3 class="pb-2 text-sm font-semibold max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis">Question 3</h3>
-          <p class="text-xs text-left opacity-70">Elit eget gravida cum sociis natoque penatibus et.</p>
-          <img src="@/assets/icon/more_square.svg" class="hidden absolute right-2 top-2 w-5 rounded-full group-hover:block hover:bg-[#0001] active:bg-theme-darklight" alt="more">
-        </button>
-        <button class="group relative flex flex-col justify-center w-full px-10 py-2 border-b border-b-theme-gridlight hover:bg-theme-light last:border-0">
-          <h3 class="pb-2 text-sm font-semibold max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis">Question 4</h3>
-          <p class="text-xs text-left opacity-70">Scelerisque varius morbi enim nunc. Est ante in nibh mauris cursus mattis molestie a.</p>
+        <button 
+          v-for="(value, key, index) in panelHistoryPrompt" 
+          :key="key" 
+          @click="sendMessageFromQuestion(value)"
+          class="group relative flex flex-col justify-center w-full px-10 py-2 border-b border-b-theme-gridlight hover:bg-theme-light last:border-0"
+        >
+          <h3 class="pb-2 text-sm font-semibold max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis">Question {{ index + 1 }}</h3>
+          <p class="text-xs text-left opacity-70">{{ value }}</p>
           <img src="@/assets/icon/more_square.svg" class="hidden absolute right-2 top-2 w-5 rounded-full group-hover:block hover:bg-[#0001] active:bg-theme-darklight" alt="more">
         </button>
       </div>
@@ -95,6 +85,7 @@
 
 <script>
 import { useStatusStore } from '@/store/StatusStore'
+import { useWritingBotStore } from '@/store/WritingBotStore'
 
 import { 
   NotebookPen,
@@ -110,12 +101,21 @@ export default {
     props: [
       'openSidemenu'
     ],
+    emits: ["sendMessageFromQuestion"],
     data() {
       return {
         store: useStatusStore(),
+        writingBotStore: useWritingBotStore(),
       }
     },
     computed: {
+      panelHistoryPrompt() {
+        let promptList = this.writingBotStore.getPanelHistory[1]
+        if (promptList) {
+          return Object.fromEntries(Object.entries(promptList).filter((v) => { return v[0].startsWith('prompt') }))
+        }
+        return {}
+      }
     },
     created() {
       this.$watch(
@@ -128,6 +128,9 @@ export default {
     methods: {
       closeSidemenu() {
         this.store.sidemenuStatus = false
+      },
+      sendMessageFromQuestion(value) {
+        this.$emit('sendMessageFromQuestion', value)
       }
     }
 }
