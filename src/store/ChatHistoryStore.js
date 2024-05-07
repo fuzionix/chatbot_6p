@@ -6,7 +6,7 @@ export const useChatHistoryStore = defineStore('chatHistoryStore', {
       chatHistory: [
         {
           name: 'Expert',
-          message: 'I am an expert of math. Feel free to ask me anything about math 😊',
+          message: 'I am your writing assistant. Feel free to ask me anything about your topic 😊',
           user: false
         }
       ]

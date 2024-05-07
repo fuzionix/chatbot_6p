@@ -276,7 +276,7 @@ export default {
             data: {
               input: {
                 top_p: 1,
-                prompt: textInput,
+                prompt: prompt,
                 temperature: 0.5,
                 max_tokens: 1024,
                 min_tokens: 0,
@@ -316,7 +316,7 @@ export default {
       },
       createPrompt(chatHistory = []) {
         let promptResult = ''
-        let promptRole = 'You are an expert in math.'
+        let promptRole = 'You are an expert in assisting students to write an article on a specific topic.'
 
         promptResult += `${promptRole} \n`
 
@@ -325,6 +325,8 @@ export default {
         })
 
         promptResult += `Expert: `
+
+        console.log('promptResult: ', promptResult)
 
         return promptResult
       },
