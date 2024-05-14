@@ -39,7 +39,7 @@
         </button>
       </div>
       
-      <div class="my-4 border-y border-y-theme-gridlight">
+      <div v-if="Object.keys(panelHistoryPrompt).length" class="my-4 border-y border-y-theme-gridlight">
         <button 
           v-for="(value, key, index) in panelHistoryPrompt" 
           :key="key" 
@@ -51,7 +51,10 @@
           <img src="@/assets/icon/more_square.svg" class="hidden absolute right-2 top-2 w-5 rounded-full group-hover:block hover:bg-[#0001] active:bg-theme-darklight" alt="more">
         </button>
       </div>
-      <button class="text-theme-dark text-xs text-center font-semibold hover:underline">Show More</button>
+      <div v-else class="my-4 border-y border-y-theme-gridlight">
+        <p class="w-full py-6 text-center text-xs opacity-70">No Prompt</p>
+      </div>
+      <p class="text-xs text-center font-semibold">Click question item to ask AI assistant</p>
     </section>
     <section id="internal-link" class="flex flex-wrap justify-center mx-7 pt-7 pb-3 text-xs border-b border-theme-darklight
     [&>a]:opacity-75 [&>a]:text-theme-black [&>a]:mx-1.5 [&>a]:my-0.5 hover:[&>a]:underline hover:[&>a]:opacity-100">

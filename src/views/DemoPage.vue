@@ -364,6 +364,7 @@ export default {
               await this.delay(updateRate)
               await this.getPredictions(predictionId)
             } else {
+              console.error(data)
               throw new Error('Unknown response status')
             }
           }).catch((error) => {

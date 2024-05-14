@@ -34,13 +34,10 @@
         </div>
         <div v-if="tabState.about" id="about">
           <div class="px-7 pt-7">
-            <h2 class="font-medium text-xl">Text</h2>
-            <p class="pt-2 text-sm opacity-70">Text</p>
-            <div class="flex my-7 py-7 border-y">
-              <div class="flex-1 pr-2">
-                <h5 class="pb-1 text-sm font-semibold text-theme-darklight">Operated by</h5>
-                <p class="text-sm leading-relaxed">Text</p>
-              </div>
+            <h2 class="font-medium text-xl">Pedagogical Framework</h2>
+            <p class="pt-2 text-sm opacity-70">The chatbot aims to provide personalized guidance for academic writing aligned with the six phases of the 6P Pedagogical Framework: planning, previewing, prompting, producing, peer reviewing and portfolio tracking (Kong and Lee, 2023).</p>
+            <div class="flex mt-7 pt-7 border-t">
+              
             </div>
             <div>
               <h5 class="pb-4 text-sm font-semibold text-theme-darklight">Information</h5>
@@ -52,7 +49,21 @@
         </div>
         <div v-if="tabState.framework" value="framework">
           <div v-if="true" class="p-7">
-            
+            <div 
+              v-for="item in framework"
+              :key="item"
+              class="flex items-center w-full mb-4 rounded-lg border border-theme-gray p-4 hover:bg-theme-light"
+            >
+              <div class="pr-4 border-r border-theme-gray">
+                <component :is="item.icon" :size="20" :strokeWidth="1.5" />
+              </div>
+              <div class="flex-1 pl-4 border-r border-theme-gray text-left">
+                <h5 class="text-sm font-semibold">{{ item['name'] }}</h5>
+                <span class="text-xs opacity-70 mr-1 border-b border-theme-gray">
+                  {{ item['description'] }}
+                </span>
+              </div>
+            </div>
           </div>
           <div v-else class="p-7">
             <Alert class="mb-8" variant="destructive">
@@ -78,7 +89,13 @@ import {
   UserRoundPlus,
   AtSign,
   MessageSquareText,
-  AlertCircle
+  AlertCircle,
+  ClipboardPenLine,
+  Sparkles,
+  Eye,
+  BookOpenCheck,
+  UserRoundSearch,
+  FolderOpen
 } from 'lucide-vue-next';
 
 export default {
@@ -88,6 +105,12 @@ export default {
       AtSign,
       MessageSquareText,
       AlertCircle,
+      ClipboardPenLine,
+      Sparkles,
+      Eye,
+      BookOpenCheck,
+      UserRoundSearch,
+      FolderOpen,
       Alert, 
       AlertDescription, 
       AlertTitle
@@ -100,7 +123,39 @@ export default {
         tabState: {
           about: false,
           framework: true
-        }
+        },
+        framework: [
+          {
+            name: 'Plan',
+            description: 'Lorem Ipsum',
+            icon: 'ClipboardPenLine'
+          },
+          {
+            name: 'Prompt',
+            description: 'Lorem Ipsum',
+            icon: 'Sparkles'
+          },
+          {
+            name: 'Preview',
+            description: 'Lorem Ipsum',
+            icon: 'Eye'
+          },
+          {
+            name: 'Produce',
+            description: 'Lorem Ipsum',
+            icon: 'BookOpenCheck'
+          },
+          {
+            name: 'Peer Review',
+            description: 'Lorem Ipsum',
+            icon: 'UserRoundSearch'
+          },
+          {
+            name: 'Portfolio Tracking',
+            description: 'Lorem Ipsum',
+            icon: 'FolderOpen'
+          }
+        ]
       }
     },
     computed: {
