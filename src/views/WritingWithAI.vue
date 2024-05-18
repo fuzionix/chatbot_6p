@@ -240,6 +240,7 @@
                         <div class="relative">
                           <Input 
                             @input="updatePanel('preview')" 
+                            @keyup.enter="createPrompt('refinements')"
                             type="text" 
                             class="h-[50px] pl-6 pr-12 bg-theme-light text-md" 
                             placeholder="" 
@@ -247,7 +248,7 @@
                             maxlength="300" 
                             autofocus 
                           />
-                          <button type="submit" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
+                          <button type="submit" @keyup.enter="createPrompt('refinements')" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
                             <WandSparkles width="16" height="16" alt="" />
                           </button>
                         </div>
@@ -266,7 +267,7 @@
                     class="flex items-center w-full h-[40px] py-2 px-3 mb-2 rounded-lg"
                   >
                     <ClipboardCheck size="20" :strokeWidth="1.5" class="mr-8" />
-                    <span class="font-medium text-sm">Okay, I Finished</span>
+                    <span class="font-medium text-sm">Produce Now</span>
                   </Button>
                 </CardFooter>
               </Card>
@@ -457,7 +458,7 @@ function updatePanel(phase) {
         case 'preview':
           writingBotStore.updatePanelItem({
             name: phase,
-            refinements: values.refinements ?? 'No refinements'
+            refinements: values.refinements ?? ' '
           })
           writingBotStore.updatePanelHistoryEmpty(2)
           break
@@ -496,6 +497,11 @@ function createPrompt(field = '') {
     case 'preview':
       promptResult += `Topic of the writing: ${panelHistory[0].topic} \n`
       promptResult += `Writing Plan: ${panelHistory[0].plan}`
+    case 'refinements':
+      promptResult += `Topic of the writing: ${panelHistory[0].topic} \n`
+      promptResult += `Paper: ${predictions['preview']} \n`
+      promptResult += `Refinements: ${panelHistory[2].refinements} \n`
+      promptResult += `Revised Paper: `
   }
   
   sendPrompt(promptResult, field)
@@ -503,6 +509,10 @@ function createPrompt(field = '') {
 
 function sendPrompt(prompt = '', field = '') {
   if (!llmLoading.value) {
+    if (field === 'refinements') {
+      field = 'preview'
+    }
+
     llmLoading.value = true
     predictionsLoading.value[field] = true
     connectError.value = false

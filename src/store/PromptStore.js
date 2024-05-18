@@ -5,7 +5,8 @@ export const usePromptStore = defineStore('promptStore', {
     return { 
       prompt: {
         planningApproach: 'Please assist students to plan the content and structure of the writing to effectively respond to an issue, research question, or problem.',
-        preview: 'Please create a draft according to the topic and the writing plan.'
+        preview: 'Please create a draft according to the topic and the writing plan.',
+        refinements: 'Please adjust the following paper according to the suggestion of refinements.'
       },
       prefix: '',
       suffix: '',
