@@ -240,7 +240,7 @@
                         <div class="relative">
                           <Input 
                             @input="updatePanel('preview')" 
-                            @keyup.enter="createPrompt('refinements')"
+                            @keyup.enter="updatePanelProgress(3); createPrompt('refinements')"
                             type="text" 
                             class="h-[50px] pl-6 pr-12 bg-theme-light text-md" 
                             placeholder="" 
@@ -248,7 +248,7 @@
                             maxlength="300" 
                             autofocus 
                           />
-                          <button type="submit" @keyup.enter="createPrompt('refinements')" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
+                          <button type="submit" @keyup.enter="updatePanelProgress(3); createPrompt('refinements')" class="absolute top-[50%] right-0 translate-y-[-50%] mr-6">
                             <WandSparkles width="16" height="16" alt="" />
                           </button>
                         </div>
@@ -263,7 +263,7 @@
                 <CardFooter class="text-xs text-theme-black">
                   <Button 
                     v-if="isPanelHistoryEmpty[2]"
-                    @click="updatePanelProgress(3)" 
+                    @click="updatePanelProgress(3); createPrompt('refinements')" 
                     class="flex items-center w-full h-[40px] py-2 px-3 mb-2 rounded-lg"
                   >
                     <ClipboardCheck size="20" :strokeWidth="1.5" class="mr-8" />
@@ -276,7 +276,13 @@
               <Card v-if="panelProgress >= 4" class="mb-6">
                 <CardHeader>
                   <CardTitle class="font-semibold text-base">
-                    <BookOpenCheck class="mb-2" />
+                    <div class="flex justify-between">
+                      <BookOpenCheck class="mb-2" />
+                      <Loader 
+                        v-if="predictionsLoading['produce'] === true" 
+                        class="mb-2 animate-spin" 
+                      />
+                    </div>
                     <span>Produce</span>
                   </CardTitle>
                   <CardDescription>Done. Be sure to integrate relevant academic sources and properly cite all references.</CardDescription>
@@ -284,17 +290,9 @@
                 <CardContent>
                   <FormField name="">
                     <FormItem>
-                      <div class="flex justify-between items-center">
-                        <FormLabel>Result</FormLabel>
-                        <button 
-                          class="hover:-rotate-180 duration-200"
-                          @click.prevent=""
-                        >
-                          <RotateCcw width="16" height="16" />
-                        </button>
+                      <div class="!mb-8 !mt-4 pt-4">
+                        <pre>{{ predictions['produce'] }}</pre>
                       </div>
-                      
-                      <div class="!mb-8 !mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</div>
                       <FormMessage />
                     </FormItem>
                   </FormField>
@@ -497,11 +495,13 @@ function createPrompt(field = '') {
     case 'preview':
       promptResult += `Topic of the writing: ${panelHistory[0].topic} \n`
       promptResult += `Writing Plan: ${panelHistory[0].plan}`
+      break
     case 'refinements':
       promptResult += `Topic of the writing: ${panelHistory[0].topic} \n`
       promptResult += `Paper: ${predictions['preview']} \n`
       promptResult += `Refinements: ${panelHistory[2].refinements} \n`
       promptResult += `Revised Paper: `
+      break
   }
   
   sendPrompt(promptResult, field)
@@ -510,7 +510,7 @@ function createPrompt(field = '') {
 function sendPrompt(prompt = '', field = '') {
   if (!llmLoading.value) {
     if (field === 'refinements') {
-      field = 'preview'
+      field = 'produce'
     }
 
     llmLoading.value = true
