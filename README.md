@@ -83,3 +83,17 @@ Before you can set up the project using Docker, make sure you have the following
    ```
 
 2. Open your web browser and navigate to `http://localhost:5173`. You should see the application running.
+
+
+## Related Documentation
+
+| Technology | Description |
+| --- | --- |
+| [Vue](https://v3.vuejs.org/guide/introduction.html) | Vue.js is a progressive JavaScript framework for building user interfaces. It is primarily focused on the view layer, making it easy to integrate with other libraries or existing projects. Vue provides a reactive and composable way to build components. |
+| [Vite](https://vitejs.dev/guide/) | Vite is a build tool that aims to provide a faster and leaner development experience for modern web projects. It utilizes native ES modules, enabling faster cold starts and more efficient bundling. Vite supports various features, such as hot module replacement (HMR), code splitting, and more. |
+| [Tailwind CSS](https://tailwindcss.com/docs/installation) | Tailwind CSS is a utility-first CSS framework that provides a set of pre-defined classes to style your application. It encourages a component-based approach to styling, allowing you to quickly build responsive and customizable user interfaces. |
+| [Pinia](https://pinia.vuejs.org/introduction.html) | Pinia is a state management library for Vue.js. It provides a simple and powerful way to manage the state of your application, with features like store composition, state sharing, and time-travel debugging. |
+| [Vue Router](https://router.vuejs.org/guide/) | Vue Router is the official routing library for Vue.js. It allows you to create single-page applications (SPAs) by mapping URLs to Vue components, handling navigation, and managing the browser history. |
+| [shadcn/vue](https://www.shadcn-vue.com/docs/introduction.html) | shadcn/vue is a collection of accessible and customizable Vue.js components built using Tailwind CSS. It provides a set of high-quality UI components that can be easily integrated into your Vue.js projects. |
+| [Axios](https://axios-http.com/docs/intro) | Axios is a popular HTTP client library for JavaScript. It provides a simple and consistent API for making HTTP requests, handling responses, and handling errors, making it easier to work with APIs in your Vue.js applications. |
+| [Docker](https://docs.docker.com/get-started/) | Docker is a platform for building, deploying, and managing containerized applications. It allows you to package your application and all its dependencies into a single container, ensuring consistent and reliable deployments across different environments. |
