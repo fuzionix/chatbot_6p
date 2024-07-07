@@ -207,6 +207,12 @@ export default {
       }
     },
     computed: {
+      /**
+       * This property is reactive, meaning it will automatically update when the
+       * chatHistory in the store changes.
+       *
+       * @returns {Array} 
+       */
       chatHistory() {
         return this.chatHistoryStore.getChatHistory
       }
@@ -239,10 +245,17 @@ export default {
       changeIcon(status) {
         this.fillIcon = status
       },
+      /**
+       * Sends a message to the chatbot.
+       *
+       * @param {string} textInput
+       * @param {boolean} [refresh=false]
+       */
       sendMessage(textInput, refresh = false) {
         if (textInput && !this.isActive && !this.chatLoading) {
           this.isActive = true
 
+          // Remove error message chat bubble if it exists
           if (this.chatHistory.slice(-1)[0]?.['danger'] == true) {
             this.chatHistory.pop()
             if (refresh !== true) {
@@ -250,9 +263,10 @@ export default {
             }
           }
 
+          // Trim and remove any mentions (e.g., @username) from the text input
           textInput = textInput.replace(/@(\w+)/g, '').trim()
 
-          // insert message into chat history. display new chat bubble automatically
+          // Insert message into chat history. display new chat bubble automatically
           if (!refresh) {
             this.chatHistoryStore.addChatItem({
               name: 'You',
@@ -263,6 +277,7 @@ export default {
 
           const prompt = this.createPrompt(this.chatHistory)
           
+          // Add a placeholder message to the chat history for the chatbot's response
           this.chatHistoryStore.addChatItem({
             name: '',
             message: '',
@@ -270,6 +285,8 @@ export default {
           })
           this.chatLoading = true
 
+          // Request the API to start generating the response and get the response ID. 
+          // According to the Replicate API mechanism. No chat response will be returned in this stage. If you are using others APIs, you could directly get the response below instead of making another API call.
           axios({
             method: 'post',
             url: '/api',
@@ -290,6 +307,7 @@ export default {
               'Content-Type': 'application/json'
             },
           }).then(async (response) => {
+            // Get the chat response according to the response ID
             this.getPredictions(response.data.id)
           }).catch((error) => {
             console.error(error)
@@ -314,6 +332,12 @@ export default {
       sendMessageFromQuestion(value) {
         this.sendMessage(value)
       },
+      /**
+       * Creates a prompt string for the AI assistant with the provided chat history as context.
+       *
+       * @param {Array} [chatHistory=[]]
+       * @returns {string}
+       */
       createPrompt(chatHistory = []) {
         let promptResult = ''
         let promptRole = 'You are an expert in assisting students to write an article on a specific topic.'
@@ -325,9 +349,6 @@ export default {
         })
 
         promptResult += `Expert: `
-
-        console.log('promptResult: ', promptResult)
-
         return promptResult
       },
       scrollToBottom() {
@@ -339,6 +360,12 @@ export default {
           })
         })
       },
+      /**
+       * Retrieves the predictions for a given prediction ID using the Replicate API and updates the chat history accordingly.
+       *
+       * @param {string} predictionId
+       * @returns {Promise<void>}
+       */
       async getPredictions(predictionId) {
         try {
           await axios({
@@ -385,6 +412,11 @@ export default {
       delay(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms))
       },
+      /**
+       * Resets the chat history to its initial state. First AI chat bubble will be remained.
+       *
+       * @returns {null}
+       */
       chatReset() {
         if (this.chatHistory.length > 1) {
           const answer = window.confirm('Are you sure you want to reset the conversation? Confirm to reset')
@@ -393,6 +425,11 @@ export default {
           }
         }
       },
+      /**
+       * Remove the last chat bubble from the chat history.
+       *
+       * @returns {null}
+       */
       chatUndo() {
         if (this.chatHistory.length > 1) {
           this.chatHistoryStore.popChatItem()

@@ -433,6 +433,13 @@ const onSubmit = handleSubmit((values) => {
   return values
 })
 
+/**
+ * Updates the panel item based on the given phase when the user updates form input. 
+ * The approach can ensure the form input values are remained after page leave.
+ *
+ * @param {string} phase - The phase of the writing process ('plan', 'prompt', or 'preview').
+ * @returns {void}
+ */
 function updatePanel(phase) {
   formbutton.value.click()
   onSubmit().then((values) => {
@@ -467,6 +474,11 @@ function updatePanel(phase) {
   })
 }
 
+/**
+ * Control the visibility of the phase sections.
+ *
+ * @param {number} pnum - The panel number to update the progress for.
+ */
 function updatePanelProgress(pnum) {
   formbutton.value.click()
   onSubmit().then((values) => {
@@ -484,6 +496,12 @@ function updatePanelProgress(pnum) {
   
 }
 
+/**
+ * Creates a prompt string for the AI assistant. The prompt includes instructions and context relevant to the specified field.
+ *
+ * @param {string} [field=''] - The field for which the prompt should be generated.
+ * @returns {void}
+ */
 function createPrompt(field = '') {
   let promptResult = ''
   promptResult += `${promptList[field]} \n`
@@ -507,6 +525,12 @@ function createPrompt(field = '') {
   sendPrompt(promptResult, field)
 }
 
+/**
+ * Sends a prompt to the API to generate a response.
+ *
+ * @param {string} [prompt='']
+ * @param {string} [field='']
+ */
 function sendPrompt(prompt = '', field = '') {
   if (!llmLoading.value) {
     if (field === 'refinements') {
@@ -518,6 +542,8 @@ function sendPrompt(prompt = '', field = '') {
     connectError.value = false
     connectErrorMessage.value = ''
 
+    // Request the API to start generating the response and get the response ID. 
+    // According to the Replicate API mechanism. No chat response will be returned in this stage. If you are using others APIs, you may directly get the response below instead of making another API call.
     axios({
       method: 'post',
       url: '/api',
@@ -538,6 +564,7 @@ function sendPrompt(prompt = '', field = '') {
         'Content-Type': 'application/json'
       },
     }).then(async (response) => {
+      // Get the chat response according to the response ID
       getPredictions(response.data.id, field)
     }).catch((error) => {
       connectError.value = true
@@ -551,6 +578,12 @@ function sendPrompt(prompt = '', field = '') {
 }
 
 // TODO: Limit Maximum Trial
+/**
+ * Retrieves the predictions for a given prediction ID using the Replicate API and updates the chat history accordingly.
+ *
+ * @param {string} predictionId
+ * @returns {Promise<void>}
+ */
 async function getPredictions(predictionId, field = '') {
   try {
     await axios({

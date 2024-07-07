@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 
+// To manage the chat history between the user and the AI assistant
 export const useChatHistoryStore = defineStore('chatHistoryStore', {
   state: () => {
     return { 

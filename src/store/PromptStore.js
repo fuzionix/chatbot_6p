@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 
+// To manage the prompts used for different stages of the writing process
 export const usePromptStore = defineStore('promptStore', {
   state: () => {
     return { 
