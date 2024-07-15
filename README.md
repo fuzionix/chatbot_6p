@@ -85,6 +85,57 @@ Before you can set up the project using Docker, make sure you have the following
 2. Open your web browser and navigate to `http://localhost:5173`. You should see the application running.
 
 
+## Change API Provider
+
+If you need to change the API provider, follow these steps:
+
+1. Update the `.env` file:
+   - Replace the existing API token with the new one from your chosen provider:
+     ```
+     VITE_APP_REPLICATE_API_TOKEN=[NEW_API_TOKEN]
+     ```
+   > Notice: Environment variable name must be started with `VITE_APP_`
+
+2. Update the proxy in `vite.config.js`:
+   - Modify the server.proxy configuration to point to the new API endpoints. For example:
+      ```javascript
+      server: {
+         proxy: {
+            '/api': {
+               target: 'https://new-api-provider.com/endpoint',
+               changeOrigin: true,
+               secure: false,
+               rewrite: (path) => path.replace(/^\/api/, ''),
+            },
+         },
+         watch: {
+            usePolling: true
+         }
+      },
+     ```
+
+3. Update API request methods in .vue files:
+   - Modify the API request methods in Vue components to match the new API provider's requirements.
+      ```javascript
+      axios({
+         method: 'post',
+         url: '/api',
+         data: {
+            //
+         },
+         headers: {
+            'Authorization': `Bearer ${api_key}`,
+            'Content-Type': 'application/json'
+         },
+      }).then(async (response) => {
+         // Handle response
+      }).catch((error) => {
+         //
+      }).finally(() => {
+         //
+      })
+      ```
+
 ## Related Documentation
 
 | Technology | Description |
