@@ -2,6 +2,8 @@
 
 The chatbot aims to provide personalized guidance for academic writing aligned with the six phases of the 6P Pedagogical Framework: planning, previewing, prompting, producing, peer reviewing and portfolio tracking (Kong and Lee, 2023).
 
+<video src="Demostration_Video.mp4"></video>
+
 ## Installation
 
 ### Local Development
